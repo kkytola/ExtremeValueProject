@@ -136,7 +136,7 @@ lemma affine_continuousAt_of_continuousAt
     have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
         exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
     rw[h1]
-
+    sorry
 
 
 
