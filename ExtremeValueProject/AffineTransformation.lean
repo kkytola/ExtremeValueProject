@@ -126,7 +126,37 @@ lemma affine_continuousAt_of_continuousAt
     {F : CumulativeDistributionFunction} {x : ℝ} (F_cont : ContinuousAt F x)
     (A : orientationPreservingAffineEquiv) :
     ContinuousAt (A • F) ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by
-  sorry -- **Issue #6**
+    have hA: Continuous (A : ℝ ≃ᵃ[ℝ] ℝ):= by sorry
+    have hA1: ContinuousAt (A : ℝ ≃ᵃ[ℝ] ℝ) (x):= by exact Continuous.continuousAt hA
+    unfold ContinuousAt at *
+    unfold Filter.Tendsto at *
+    simp only [mulAction_apply_eq] at *
+    have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
+        exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
+    have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
+        exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
+    rw[h1]
+
+
+
+
+    /-intro u hu
+    have ha: Continuous (A : ℝ ≃ᵃ[ℝ] ℝ):= by sorry
+    simp only [mulAction_apply_eq] at *
+    have hu1: u ∈ nhds (F x):= by
+      have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
+        exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
+      have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
+        exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
+      rw[h1] at hu
+      exact hu
+    have hu2:  u ∈ Filter.map (↑F.toStieltjesFunction) (nhds x) := by exact F_cont hu1
+    have h2:Filter.map (↑(A • F).toStieltjesFunction) (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x))=Filter.map (↑F.toStieltjesFunction) (nhds x):= by
+      calc
+        _ = Filter.map (↑(A • F).toStieltjesFunction) (Filter.map (A : ℝ ≃ᵃ[ℝ] ℝ) (nhds (x))) := by
+          have: ha1:  (Filter.map (A : ℝ ≃ᵃ[ℝ] ℝ) (nhds (x)))-/
+
+
 
 /-- An affine transform of a c.d.f. is continuious at `A x` if and only if the c.d.f. itself is
 continuous at `x`. -/
