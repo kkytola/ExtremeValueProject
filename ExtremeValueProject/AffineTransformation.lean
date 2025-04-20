@@ -10,12 +10,14 @@ import Mathlib.Order.OrdContinuous
 import Mathlib.RingTheory.Henselian
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 import Mathlib.Topology.Metrizable.CompletelyMetrizable
+import Mathlib.LinearAlgebra.AffineSpace.AffineEquiv
+
 
 
 
 section affine
 
-open Topology Filter Set
+open Topology Filter Set Function
 
 /-- Mathlib's definition of an affine map is more general, but it can be shown that an affine
 map `A : 𝕜 → 𝕜` of a field `𝕜` is a map of the form `x ↦ a * x + b` for some
@@ -126,18 +128,43 @@ lemma affine_continuousAt_of_continuousAt
     {F : CumulativeDistributionFunction} {x : ℝ} (F_cont : ContinuousAt F x)
     (A : orientationPreservingAffineEquiv) :
     ContinuousAt (A • F) ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by
-    have hA: Continuous (A : ℝ ≃ᵃ[ℝ] ℝ):= by sorry
-    have hA1: ContinuousAt (A : ℝ ≃ᵃ[ℝ] ℝ) (x):= by exact Continuous.continuousAt hA
-    unfold ContinuousAt at *
-    unfold Filter.Tendsto at *
-    simp only [mulAction_apply_eq] at *
-    have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
-        exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
-    have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
-        exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
-    rw[h1]
-    sorry
+      unfold ContinuousAt at *
+      unfold Filter.Tendsto at *
+      simp only [mulAction_apply_eq] at *
+      have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
+          exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
+      have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
+          exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
+      rw[h1]
+      have hA: IsOpenMap (A : ℝ ≃ᵃ[ℝ] ℝ):= by
+        let L : ℝ ≃L[ℝ] ℝ := (A : ℝ ≃ᵃ[ℝ] ℝ).linear.toContinuousLinearEquiv
+        let f : ℝ → ℝ := λ x ↦ L x + (A : ℝ ≃ᵃ[ℝ] ℝ) 0
+        let g: ℝ → ℝ:= λ x ↦ x + (A : ℝ ≃ᵃ[ℝ] ℝ) 0
 
+        have h_open : IsOpenMap f := by
+          have hg_open: IsOpenMap g:= isOpenMap_add_right ((A : ℝ ≃ᵃ[ℝ] ℝ) 0)
+          have hl_open: IsOpenMap L:= L.isOpenMap
+          have h_eq2: f = g ∘ L := by exact rfl
+          rw[h_eq2]
+          exact IsOpenMap.comp hg_open hl_open
+        have h_eq : ∀ x, (A : ℝ ≃ᵃ[ℝ] ℝ) x = f x := by
+          intro x
+          sorry
+        sorry
+      have h2: Filter.map (A • F) (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)) ≤  Filter.map F (nhds x) := by
+        intro V hV
+        simp at hV
+        have hau: (A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)  ∈ (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)):=by sorry
+          /- use the fact A is an open map-/
+        have hv1: V = (A • F)'' ((A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)) := by
+          simp only [mulAction_apply_eq]
+          sorry
+        sorry
+
+      exact fun ⦃U⦄ a => h2 (F_cont a)
+
+
+    #check (A : ℝ ≃ᵃ[ℝ] ℝ).map_vadd
 
 
     /-intro u hu
