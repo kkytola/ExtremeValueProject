@@ -10,14 +10,14 @@ import Mathlib.Order.OrdContinuous
 import Mathlib.RingTheory.Henselian
 import Mathlib.Topology.Algebra.Module.ModuleTopology
 import Mathlib.Topology.Metrizable.CompletelyMetrizable
-import Mathlib.LinearAlgebra.AffineSpace.AffineEquiv
+
 
 
 
 
 section affine
 
-open Topology Filter Set Function
+open Topology Filter Set
 
 /-- Mathlib's definition of an affine map is more general, but it can be shown that an affine
 map `A : 𝕜 → 𝕜` of a field `𝕜` is a map of the form `x ↦ a * x + b` for some
