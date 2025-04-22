@@ -345,7 +345,7 @@ noncomputable def AffineEquiv.extend (A : ℝ ≃ᵃ[ℝ] ℝ) : EReal ≃ EReal
 
 @[simp] lemma AffineEquiv.extend_symm (A : ℝ ≃ᵃ[ℝ] ℝ) :
     A.extend.symm = A.symm.extend := by
-  sorry -- **Issue #8**
+  rfl
 
 end extend
 
