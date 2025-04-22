@@ -154,12 +154,34 @@ lemma affine_continuousAt_of_continuousAt
       have h2: Filter.map (A • F) (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)) ≤  Filter.map F (nhds x) := by
         intro V hV
         simp at hV
-        have hau: (A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)  ∈ (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)):=by sorry
-          /- use the fact A is an open map-/
+        have hau: (A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)  ∈ (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)):=by
+          rw[mem_nhds_iff]
+          rw[mem_nhds_iff] at hV
+          cases' hV with t1 ht1
+          use (A : ℝ ≃ᵃ[ℝ] ℝ) '' t1
+          cases' ht1 with ht1 ht2
+          constructor
+          ·
+            exact Set.image_mono ht1
+          ·
+            cases' ht2 with ht2 ht3
+            constructor
+            ·
+              exact hA t1 ht2
+            ·
+              exact Set.mem_image_of_mem ((A : ℝ ≃ᵃ[ℝ] ℝ)) ht3
+                      /- use the fact A is an open map and F-1 V is in neiberhood of x -/
         have hv1: V = (A • F)'' ((A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)) := by
-          simp only [mulAction_apply_eq]
-          sorry
-        sorry
+          /-should be just a simplify problem-/
+          ext x1
+          simp only [mulAction_apply_eq, Set.mem_image, Set.mem_preimage, exists_exists_and_eq_and]
+          constructor
+          ·
+            intro hx1
+            sorry
+          ·
+            sorry
+
 
       exact fun ⦃U⦄ a => h2 (F_cont a)
 
