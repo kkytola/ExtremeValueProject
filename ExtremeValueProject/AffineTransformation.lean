@@ -323,10 +323,7 @@ lemma AffineEquiv.extend_top' (A : ℝ ≃ᵃ[ℝ] ℝ) :
 --  rfl
 
 lemma AffineEquiv.extend_symm_cancel (A : ℝ ≃ᵃ[ℝ] ℝ) (x : EReal) :
-    A.symm.toAffineMap.extend (A.toAffineMap.extend x) = x ∧
-    A.toAffineMap.extend (A.symm.toAffineMap.extend x) = x := by
-  constructor
-  all_goals
+    A.symm.toAffineMap.extend (A.toAffineMap.extend x) = x := by
   simp [AffineMap.extend]
   by_cases hA : 0 < A.toAffineMap.coefs_of_field.1
   case' pos =>
@@ -348,15 +345,15 @@ lemma AffineEquiv.extend_symm_cancel (A : ℝ ≃ᵃ[ℝ] ℝ) (x : EReal) :
   rename_i h
   split at h <;> first | rfl | cases h
   all_goals
-  simp
+  rw [symm_apply_apply]
   rfl
 
 /-- Extend an affine equivalence `ℝ → ℝ` to and equivalence `[-∞,+∞] → [-∞,+∞]`. -/
 noncomputable def AffineEquiv.extend (A : ℝ ≃ᵃ[ℝ] ℝ) : EReal ≃ EReal where
   toFun := A.toAffineMap.extend
   invFun := A.symm.toAffineMap.extend
-  left_inv x := (AffineEquiv.extend_symm_cancel A x).left
-  right_inv x := (AffineEquiv.extend_symm_cancel A x).right
+  left_inv := extend_symm_cancel A
+  right_inv := extend_symm_cancel A.symm
 
 @[simp] lemma AffineEquiv.extend_bot (A : ℝ ≃ᵃ[ℝ] ℝ) :
     A.extend ⊥ = if 0 < A.toAffineMap.coefs_of_field.1 then ⊥ else ⊤ :=
