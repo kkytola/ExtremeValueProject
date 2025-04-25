@@ -128,23 +128,16 @@ lemma affine_continuousAt_of_continuousAt
     {F : CumulativeDistributionFunction} {x : ℝ} (F_cont : ContinuousAt F x)
     (A : orientationPreservingAffineEquiv) :
     ContinuousAt (A • F) ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by
-      have ha:=(A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹.continuous_of_finiteDimensional
-      let f:= fun x => (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ x
-      have h_eq: (A • F).toStieltjesFunction = F ∘ f:= by
-        ext x1
-        simp only [mulAction_apply_eq, Function.comp_apply]
-        unfold f
-        rfl
-      have hf: Continuous f:= by
-        exact ha
-      rw[h_eq]
-      have hf1: ContinuousAt f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by exact Continuous.continuousAt ha
-      have h_simp: f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x := by
-        unfold f
-        exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
-
-      rw[← h_simp] at F_cont
-      exact ContinuousAt.comp F_cont hf1
+  have ha:=(A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹.continuous_of_finiteDimensional
+  let f:= fun x => (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ x
+  have hf1: ContinuousAt f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by exact Continuous.continuousAt ha
+  have h_eq: (A • F).toStieltjesFunction = F ∘ f:= by rfl
+  rw[h_eq]
+  have h_simp: f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x := by
+    unfold f
+    exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
+  rw[← h_simp] at F_cont
+  exact ContinuousAt.comp F_cont hf1
 
 /-- An affine transform of a c.d.f. is continuious at `A x` if and only if the c.d.f. itself is
 continuous at `x`. -/
