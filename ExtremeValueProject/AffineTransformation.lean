@@ -128,84 +128,23 @@ lemma affine_continuousAt_of_continuousAt
     {F : CumulativeDistributionFunction} {x : ℝ} (F_cont : ContinuousAt F x)
     (A : orientationPreservingAffineEquiv) :
     ContinuousAt (A • F) ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by
-      unfold ContinuousAt at *
-      unfold Filter.Tendsto at *
-      simp only [mulAction_apply_eq] at *
-      have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
-          exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
-      have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
-          exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
-      rw[h1]
-      have hA: IsOpenMap (A : ℝ ≃ᵃ[ℝ] ℝ):= by
-        let L : ℝ ≃L[ℝ] ℝ := (A : ℝ ≃ᵃ[ℝ] ℝ).linear.toContinuousLinearEquiv
-        let f : ℝ → ℝ := λ x ↦ L x + (A : ℝ ≃ᵃ[ℝ] ℝ) 0
-        let g: ℝ → ℝ:= λ x ↦ x + (A : ℝ ≃ᵃ[ℝ] ℝ) 0
-
-        have h_open : IsOpenMap f := by
-          have hg_open: IsOpenMap g:= isOpenMap_add_right ((A : ℝ ≃ᵃ[ℝ] ℝ) 0)
-          have hl_open: IsOpenMap L:= L.isOpenMap
-          have h_eq2: f = g ∘ L := by exact rfl
-          rw[h_eq2]
-          exact IsOpenMap.comp hg_open hl_open
-        have h_eq : ∀ x, (A : ℝ ≃ᵃ[ℝ] ℝ) x = f x := by
-          intro x
-          sorry
-        sorry
-      have h2: Filter.map (A • F) (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)) ≤  Filter.map F (nhds x) := by
-        intro V hV
-        simp at hV
-        have hau: (A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)  ∈ (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x)):=by
-          rw[mem_nhds_iff]
-          rw[mem_nhds_iff] at hV
-          cases' hV with t1 ht1
-          use (A : ℝ ≃ᵃ[ℝ] ℝ) '' t1
-          cases' ht1 with ht1 ht2
-          constructor
-          ·
-            exact Set.image_mono ht1
-          ·
-            cases' ht2 with ht2 ht3
-            constructor
-            ·
-              exact hA t1 ht2
-            ·
-              exact Set.mem_image_of_mem ((A : ℝ ≃ᵃ[ℝ] ℝ)) ht3
-                      /- use the fact A is an open map and F-1 V is in neiberhood of x -/
-        have hv1: V = (A • F)'' ((A : ℝ ≃ᵃ[ℝ] ℝ) '' (F⁻¹'V)) := by
-          /-should be just a simplify problem-/
-          ext x1
-          simp only [mulAction_apply_eq, Set.mem_image, Set.mem_preimage, exists_exists_and_eq_and]
-          constructor
-          ·
-            intro hx1
-            sorry
-          ·
-            sorry
-
-
-      exact fun ⦃U⦄ a => h2 (F_cont a)
-
-
-    #check (A : ℝ ≃ᵃ[ℝ] ℝ).map_vadd
-
-
-    /-intro u hu
-    have ha: Continuous (A : ℝ ≃ᵃ[ℝ] ℝ):= by sorry
-    simp only [mulAction_apply_eq] at *
-    have hu1: u ∈ nhds (F x):= by
-      have ha: (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x:= by
+      have ha:=(A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹.continuous_of_finiteDimensional
+      let f:= fun x => (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ x
+      have h_eq: (A • F).toStieltjesFunction = F ∘ f:= by
+        ext x1
+        simp only [mulAction_apply_eq, Function.comp_apply]
+        unfold f
+        rfl
+      have hf: Continuous f:= by
+        exact ha
+      rw[h_eq]
+      have hf1: ContinuousAt f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) := by exact Continuous.continuousAt ha
+      have h_simp: f ((A : ℝ ≃ᵃ[ℝ] ℝ) x) = x := by
+        unfold f
         exact (AffineEquiv.apply_eq_iff_eq_symm_apply (A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹).mpr rfl
-      have h1: nhds (F ((A : ℝ ≃ᵃ[ℝ] ℝ)⁻¹ ((A : ℝ ≃ᵃ[ℝ] ℝ) x))) = nhds (F x) := by
-        exact congrArg nhds (congrArg (↑F.toStieltjesFunction) ha)
-      rw[h1] at hu
-      exact hu
-    have hu2:  u ∈ Filter.map (↑F.toStieltjesFunction) (nhds x) := by exact F_cont hu1
-    have h2:Filter.map (↑(A • F).toStieltjesFunction) (nhds ((A : ℝ ≃ᵃ[ℝ] ℝ) x))=Filter.map (↑F.toStieltjesFunction) (nhds x):= by
-      calc
-        _ = Filter.map (↑(A • F).toStieltjesFunction) (Filter.map (A : ℝ ≃ᵃ[ℝ] ℝ) (nhds (x))) := by
-          have: ha1:  (Filter.map (A : ℝ ≃ᵃ[ℝ] ℝ) (nhds (x)))-/
 
-
+      rw[← h_simp] at F_cont
+      exact ContinuousAt.comp F_cont hf1
 
 /-- An affine transform of a c.d.f. is continuious at `A x` if and only if the c.d.f. itself is
 continuous at `x`. -/
