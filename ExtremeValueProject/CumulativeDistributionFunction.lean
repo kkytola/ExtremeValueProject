@@ -154,8 +154,11 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
   rw [Monotone.continuousAt_iff_leftLim_eq_rightLim F.mono']
   sorry -- **Issue #11**
 
-lemma tendsto_apply_of_tendsto_of_continuousAt {L : Filter ι}
-    {μs : ι →ProbabilityMeasure ℝ} {μ : ProbabilityMeasure ℝ} (weak_lim : Tendsto μs L (𝓝 μ))
+/-- Lemma 4.7 (cdf-convergence-from-convergence-in-distribution) in blueprint:
+Convergence in distribution of a sequence of Borel probability measures on `ℝ` implies that the
+corresponding c.d.f.s converge pointwise at all continuity points of the limit c.d.f. -/
+lemma tendsto_apply_of_tendsto_of_continuousAt {ι : Type*} {L : Filter ι}
+    {μs : ι → ProbabilityMeasure ℝ} {μ : ProbabilityMeasure ℝ} (weak_lim : Tendsto μs L (𝓝 μ))
     {x : ℝ} (cont : ContinuousAt μ.cdf x) :
     Tendsto (fun i ↦ (μs i).cdf x) L (𝓝 (μ.cdf x)) := by
   convert (NNReal.continuous_coe.tendsto _).comp <|

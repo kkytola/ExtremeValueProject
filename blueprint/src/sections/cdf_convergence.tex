@@ -41,15 +41,16 @@ reads:
 \end{lemma}
 \begin{proof}
   %\uses{}
-  % \leanok
+  \leanok
+  \mathlibok
   (The proof should already be in Mathlib.)
 \end{proof}
 
 \begin{lemma}[Tightness of a cumulative distribution function]
   \label{lem:cdf-tight}
   \uses{def:cdf}
-  %\lean{}
-  % \leanok
+  \lean{CumulativeDistributionFunction.forall_pos_exists_lt_gt_continuousAt}
+  \leanok
   Let $F$ be a cumulative distribution function. Then for any
   $\eps > 0$ there exists points $a,b \in \bR$ with $a < b$ such that
   $F(b) - F(a) > 1 - \eps$ and $F$ is continuous at the points $a$ and $b$.
@@ -73,8 +74,8 @@ reads:
 \begin{lemma}[Subdivision with small mesh and within dense set]
   \label{lem:subdivision-dense}
   %\uses{}
-  %\lean{}
-  % \leanok
+  \lean{forall_exists_subdivision_diff_lt_of_dense}
+  \leanok
   Let $D \subset \bR$ be a dense set and $a,b \in D$ with $a < b$.
   Then for any $\delta > 0$ there exists a $k \in \bN$
   and $a = c_0, c_1, \ldots, c_{k-1}, c_k = b \in D$ such that
@@ -89,8 +90,8 @@ reads:
 \begin{lemma}[Subdivision for continuous function approximation]
   \label{lem:continuous-function-approximation-subdivision}
   %\uses{}
-  %\lean{}
-  % \leanok
+  \lean{forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous}
+  \leanok
   Let $D \subset \bR$ be a dense set, let $f \colon \bR \to \bR$ be continuous,
   let $a, b \in D$ with $a < b$, and let $\eps > 0$.
   Then there exists a $k \in \bN$ and points
@@ -119,13 +120,68 @@ reads:
   as desired.
 \end{proof}
 
+\begin{lemma}[Simple function integral as linear combination of cdf differences]
+  \label{lem:simple-integral-cdf-difference}
+  \uses{def:cdf}
+  \lean{CumulativeDistributionFunction.integral_sum_indicator_eq}
+  \leanok
+  Let $a = c_0 < c_1 < \cdots < c_k = b$ and consider the
+  linear combination of indicator functions
+  \begin{align*}
+    h(x) = \sum_{j=1}^k \alpha_j \; \indof{(c_{j-1},c_j]}(x) .
+  \end{align*}
+  Then the integral of $h$ with respect to a Borel probability measure $\PRmeas$ on $\bR$ whose
+  can be written as
+  \begin{align*}
+    \int_{\bR} h(x) \, \ud \PRmeas (x) = \sum_{j=1}^k \alpha_j \, \big( F(c_j) - F(c_{j-1}) \big) ,
+  \end{align*}
+  where $F$ is the c.d.f. of $\PRmeas$.
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+  \begin{align*}
+  \int_{\bR} h \, \ud \PRmeas
+   = \; & \int_{\bR}
+          \Big( \sum_{j=1}^k \alpha_j \, \indof{(c_{j-1},c_j]}(x) \Big) \, \ud \PRmeas(x) \\
+   = \; & \sum_{j=1}^k \alpha_j \; \int_{\bR} \indof{(c_{j-1},c_j]}(x) \, \ud \PRmeas(x) \\
+   = \; & \sum_{j=1}^k \alpha_j \; \PRmeas \big[ (c_{j-1},c_j] \big] \\
+   = \; & \sum_{j=1}^k \alpha_j \, \big( F_n(c_j) - F_n(c_{j-1}) \big)
+  \end{align*}
+\end{proof}
+
+\begin{lemma}[One of the portmanteau implications]
+  \label{lem:portmanteau-convergence-for-borel}
+  \uses{def:convergence-in-distribution}
+  \lean{MeasureTheory.ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto',
+  MeasureTheory.ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto}
+  \leanok
+  \mathlibok
+  Weak convergence of probability measures implies that if the boundary of a Borel set carries
+  no probability mass under the limit measure, then the limit of the measures of the set equals
+  the measure of the set under the limit probability measure.
+
+  In other words, if $\lim_{n \to \infty} \PRmeas_n = \PRmeas$ in the sense of weak convergence
+  of measures, Definition~\ref{def:convergence-in-distribution}, and if $A \subset \bR$
+  is a Borel set such that $\PRmeas[\partial A] = 0$, then
+  \begin{align*}
+    \lim_{n \to \infty} \PRmeas_n [ A ] = \PRmeas [ A ] .
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  \leanok
+  \mathlibok
+  (The proof is in Mathlib.)
+\end{proof}
+
 \section{Convergence in distribution from pointwise convergence of cdfs}
 
-\begin{theorem}[Characterization of convergence in distribution with cdfs]
+\begin{theorem}[Sufficient condition for convergence in distribution with cdfs]
   \label{thm:convergence-in-distribution-with-cdf}
   \uses{def:convergence-in-distribution, def:cdf}
-  %\lean{}
-  % \leanok
+  \lean{tendsto_of_forall_continuousAt_tendsto_cdf}
+  \leanok
   Let $F$ and $F_n$, $n \in \bN$, be cumulative distribution functions of
   probability measures $\PRmeas$ and $\PRmeas_n$, $n \in \bN$, respectively, i.e.,
   \begin{align*}
@@ -138,7 +194,8 @@ reads:
 \end{theorem}
 \begin{proof}
   \uses{lem:monotone-discontinuities-countable, lem:cdf-tight,
-  lem:continuous-function-approximation-subdivision}
+  lem:continuous-function-approximation-subdivision,
+  lem:simple-integral-cdf-difference}
   % \leanok
   Let $D \subset \bR$ denote the set of continuity points of $F$. By
   Lemma~\ref{lem:monotone-discontinuities-countable}, $D$ is dense in $\bR$.
@@ -191,15 +248,13 @@ reads:
   \, \leq \; & (1 + K) \, \eps .
   \end{align*}
   It remains to consider the integrals of the function~$h$ with respect to both
-  $\PRmeas_n$ and $\PRmeas$. These integrals are expressible in terms of the
-  cumulative distribution functions,
+  $\PRmeas_n$ and $\PRmeas$. By Lemma~\ref{lem:simple-integral-cdf-difference},
+  these integrals are expressible in terms of the cumulative distribution functions,
   \begin{align*}
   \int_{\bR} h \, \ud \PRmeas_n
-  = \; & \sum_{j=1}^k f(c_j) \; \PRmeas_n \big[ (c_{j-1},c_j] \big]
-          \\
   = \; & \sum_{j=1}^k f(c_j) \, \big( F_n(c_j) - F_n(c_{j-1}) \big)
   \end{align*}
-  and similarly
+  and
   \begin{align*}
   \int_{\bR} h \, \ud \PRmeas
   % = \; & \sum_{j=1}^k f(c_j) \; \PRmeas_n \big[ (c_{j-1},c_j] \big]
@@ -245,4 +300,42 @@ reads:
   $\int f \, \ud \PRmeas_n \to \int f \, \ud \PRmeas$ as $n \to \infty$, so we
   have established the weak convergence $\PRmeas_n \to \PRmeas$
   according to Definition~\ref{def:convergence-in-distribution}.
+\end{proof}
+
+\begin{lemma}[Necessary condition for convergence in distribution with cdfs]
+  \label{lem:cdf-convergence-from-convergence-in-distribution}
+  \uses{def:convergence-in-distribution, def:cdf}
+  \lean{CumulativeDistributionFunction.tendsto_apply_of_tendsto_of_continuousAt}
+  \leanok
+  Let $\PRmeas$ and $\PRmeas_n$, $n \in \bN$, be Borel
+  probability measures on $\bR$, and let $F$ and $F_n$, $n \in \bN$,
+  be their cumulative distribution functions, respectively, i.e.,
+  \begin{align*}
+      F(x) = \; & \PRmeas \big[(-\infty,x]\big] & & \text{for $x \in \bR$} \\
+      F_n(x) = \; & \PRmeas_n \big[(-\infty,x]\big] & & \text{for $x \in \bR$ and $n \in \bN$.}
+  \end{align*}
+  If $\lim_{n \to \infty} \PRmeas_n = \PRmeas$ in the sense of weak convergence
+  of measures, Definition~\ref{def:convergence-in-distribution}, then
+  for all continuity points $x$ of $F$ we have
+  $\lim_{n \to \infty} F_n(x) = F(x)$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:cdf-continuity-pt-iff-measure-singleton, lem:portmanteau-convergence-for-borel}
+  \leanok
+  Let $x \in \bR$ be a continuity point of $F$. Then we have $\mu [\set{x}] = 0$,
+  by Lemma~\ref{lem:cdf-continuity-pt-iff-measure-singleton}.
+  Note that the boundary of the Borel set $(-\infty,x] \subset \bR$ is
+  the singleton $\partial (-\infty,x] = \set{x}$.
+  Therefore the assumption $\lim_{n \to \infty} \PRmeas_n = \PRmeas$ implies that
+  \begin{align*}
+    \PRmeas_n \big[ (-\infty,x] \big] \to \PRmeas \big[ (-\infty,x] \big] ,
+  \end{align*}
+  by a general fact (Lemma~\ref{lem:portmanteau-convergence-for-borel})
+  about weakly converging sequences of measures
+  that a for Borel sets whose boundary carries no mass in the limit measure.
+  In terms of the c.d.f.s, the above reads
+  \begin{align*}
+    F_n(x) \to F(x)
+  \end{align*}
+  as asserted.
 \end{proof}

@@ -23,6 +23,9 @@
 
 \newcommand{\eps}{\varepsilon}
 
+\newcommand{\oo}{\mathfrak{o}}
+\newcommand{\OO}{\mathcal{O}}
+
 \DeclareMathOperator{\Aut}{Aut}
 \DeclareMathOperator{\Hom}{Hom}
 \DeclareMathOperator{\GL}{GL}
@@ -36,13 +39,30 @@
 \newcommand{\set}[1]{\left\{ #1 \right\}}
 %\newcommand{\idOf}[1]{\id_{#1}}
 
+%\newcommand{\lcinv}[1]{\vec{#1}^{-1}}
+%\newcommand{\rcinv}[1]{\cev{#1}^{-1}}
+\newcommand{\lcinv}[1]{{#1}^{\rightarrow 1}}
+\newcommand{\rcinv}[1]{{#1}^{\leftarrow 1}}
+
 \newcommand{\AffOf}[1]{\mathrm{Aff}_{#1}}
 \newcommand{\AffR}{\AffOf{\R}}
 \newcommand{\OriAffR}{\mathrm{Aff}^+_{\R}}
 
+\newcommand{\tendsinlaw}{\overset{\mathrm{d}}{\longrightarrow}}
+
 \newcommand{\Gumbel}{\mathrm{Gumbel}}
 \newcommand{\Weibull}{\mathrm{Weibull}}
 \newcommand{\Frechet}{\mathrm{Fréchet}}
+\newcommand{\GumbelCDF}{\Lambda}
+\newcommand{\WeibullCDF}[1]{\Psi_{#1}}
+\newcommand{\FrechetCDF}[1]{\Phi_{#1}}
+%\newcommand{\GumbelCDF}{F_{\Gumbel}}
+%\newcommand{\WeibullCDF}[1]{F^{(#1)}_{\Weibull}}
+%\newcommand{\FrechetCDF}[1]{F^{(#1)}_{\Frechet}}
+
+\newcommand{\extendcdf}[1]{\widetilde{#1}}
+\newcommand{\oneDivOneSub}[1]{\frac{\mathbf{1}}{\mathbf{1}-\extendcdf{#1}}}
+\newcommand{\oneDivNegLog}[1]{\frac{\mathbf{1}}{\widetilde{\log} \big( 1 / \extendcdf{#1} \big)}}
 
 \newcommand{\ud}{\mathrm{d}}
 \newcommand{\der}[1]{\frac{\ud}{\ud #1}}

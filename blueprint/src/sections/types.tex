@@ -1,0 +1,638 @@
+\chapter{Types}
+
+\begin{definition}[Type (of distribution on $\bR$)]
+  \label{def:cdf-type}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf}
+  %\lean{lcinv}
+  %\leanok
+  Two c.d.f.s $F, G$ are said to be of the same type, if
+  there exists an order-preserving affine isomorphism $A \in \OriAffR$
+  such that $G = A . F$.
+
+  Being of the same type is an equivalence relation, and
+  the equivalence classes are called types (of distributions on $\bR$).
+\end{definition}
+
+
+\section{Convergence to types}
+
+The notion of convergence of cumulative distribution functions
+considered here is always taken to be pointwise convergence
+on the set of continuity points of the limit c.d.f.
+By Theorem~\ref{thm:convergence-in-distribution-with-cdf} and
+Lemma~\ref{lem:cdf-convergence-from-convergence-in-distribution},
+this corresponds to convergence in distribution (weak convergence
+of probability measures). Below, when we write $F_n \tendsinlaw F$
+for c.d.f.s $F_n$, $n \in \bN$, and $F$, this is always what we
+mean.
+
+For affine maps $A \colon \bR \to \bR$, we use the topology
+of pointwise convergence of functions. Equivalently, convergence of affine maps
+means the convergence of the coefficients $a, b \in \bR$ in the expression
+$x \mapsto a x + b$ of the affine functions
+(so $A_n \to A$ if and only if the functions are of the form
+$A_n(x) = a_n x + b_n$ and $A(x) = a x + b$, and $a_n \to a$ and $b_n \to b$).
+
+\begin{lemma}[Unique affine relation among two nondegenerate c.d.f.s]
+  \label{lem:unique-affine-relation-cdf}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Let $F, G$ be two c.d.f.s of the same type, and $A \in \OriAffR$
+  an affine isomorphism such that $G = A.F$. If $F$ is nondegenerate,
+  then $A$ is the only element of $\OriAffR$ for which the
+  relation $G = A.F$ holds.
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+  Since $F$ is nondegenerate, we can find two different points $x_1 < x_2$
+  such that $0 < F(x_1) < F(x_2) < 1$. By right continuity of $F$, we can
+  assume these points to be taken minimal with the given values, i.e.,
+  $x_j = \inf \big\{ x \in \bR \; \big| \; F(x) = F(x_j) \big\}$ for
+  $j=1,2$.
+
+  The assumption $G = A.F$ means $G(x) = F \big( A^{-1}(x) \big)$ for all $x \in \bR$.
+  Therefore $G \big( A(x_1) \big) = F(x_1) < F(x_2) = G \big( A(x_1) \big)$
+  and also $A(x_j) = \inf \big\{ y \in \bR \; \big| \; G(y) = F(x_j) \big\}$ for
+  $j=1,2$.
+
+  If $\widetilde{A} \in \OriAffR$ is also such that $G = \widetilde{A}.F$, then
+  the same holds for it:
+  $\widetilde{A}(x_j) = \inf \big\{ y \in \bR \; \big| \; G(y) = F(x_j) \big\}$
+  for $j=1,2$. We conclude that
+  \begin{align*}
+    \widetilde{A}(x_1) \, = \; &
+        \inf \big\{ y \in \bR \; \big| \; G(y) = F(x_1) \big\} \; = \, A(x_1) \\
+    \widetilde{A}(x_2) \, = \; &
+        \inf \big\{ y \in \bR \; \big| \; G(y) = F(x_2) \big\} \; = \, A(x_2) .
+  \end{align*}
+  But an affine map of $\bR$ is determined by its values at two distinct points:
+  from $a x_1 + b = y_1$ and $a x_2 + b = y_2$ with $x_1 \ne x_2$ one can solve $a, b$.
+  Therefore we must have $\widetilde{A} = A$.
+\end{proof}
+
+\begin{theorem}[Convergence to types]
+  \label{thm:convergence-to-types}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf, def:cdf-type}
+  % \lean{}
+  % \leanok
+  Suppose that $(F_n)_{n \in \bN}$  is a sequence of
+  c.d.f.s which converges to a nondegenerate c.d.f. $G$, i.e.,
+  $F_n \tendsinlaw G$ as $n \to \infty$.
+  Let $(A_n)_{n \in \bN}$ be a sequence of oriented
+  affine isomorphisms of $\bR$, $A_n \in \OriAffR$
+  such that $A_n.F_n \tendsinlaw \widetilde{G}$ for some c.d.f.
+  $\widetilde{G}$.
+
+  If we write $A_n(x) = a_n x + b_n$, then $(a_n)_{n \in \bN}$
+  and $(b_n)_{n \in \bN}$ are bounded sequences.
+
+  If $\widetilde{G}$ is nondegenerate, then
+  $A_n \to A \in \OriAffR$ and $A.\widetilde{G} = G$.
+  In particular $G$ and $\widetilde{G}$ are of the same type.
+  Moreover, $A$ is the unique affine transformation for which
+  the equality $A.\widetilde{G} = G$ holds.
+\end{theorem}
+\begin{proof}
+  \uses{lem:unique-affine-relation-cdf}
+  % \leanok
+  \ldots
+\end{proof}
+
+\begin{theorem}[Convergence to types again]
+  \label{thm:convergence-to-types-different-affine}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf, def:cdf-type}
+  % \lean{}
+  % \leanok
+  Let $(A_n)_{n \in \bN}$ and
+  $(\widetilde{A}_n)_{n \in \bN}$ be two sequences of oriented
+  affine isomorphisms of $\bR$, $A_n, \widetilde{A}_n \in \OriAffR$,
+  written as $A_n(x) = a_n x + b_n$
+  and $\widetilde{A}_n(x) = \tilde{a}_n x + \tilde{b}_n$.
+
+  Let $(F_n)_{n \in \bN}$ be a sequence of c.d.f.s
+  such that $A_n.F_n \tendsinlaw G$, with
+  $G$ a nondegenerate c.d.f.
+
+  Then the convergence of also $\widetilde{A}_n.F_n \tendsinlaw G$
+  holds if and only if the coefficients of the affine maps
+  satisfy the relations
+  \begin{align*}
+    \frac{\tilde{a}_n}{a_n} \to 1
+    \quad \text{ and } \quad
+    \frac{\tilde{b}_n - b_n}{a_n} \to 0 .
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  \uses{thm:convergence-to-types}
+  % \leanok
+  \ldots
+\end{proof}
+
+\begin{corollary}[Convergence to types with different limits]
+  \label{cor:convergence-to-types-different-limit}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf, def:cdf-type}
+  % \lean{}
+  % \leanok
+  Let $(A_n)_{n \in \bN}$ and
+  $(\widetilde{A}_n)_{n \in \bN}$ be two sequences of oriented
+  affine isomorphisms of $\bR$, $A_n, \widetilde{A}_n \in \OriAffR$,
+  written as $A_n(x) = a_n x + b_n$
+  and $\widetilde{A}_n(x) = \tilde{a}_n x + \tilde{b}_n$.
+
+  Let $(F_n)_{n \in \bN}$ be a sequence of c.d.f.s
+  such that $A_n.F_n \tendsinlaw G$ and
+  $\widetilde{A}_n.F_n \tendsinlaw \widetilde{G}$, with
+  $G$ and $\widetilde{G}$ nondegenerate c.d.f.s.
+  Then for some $\alpha>0$ and $\beta \in \bR$ we have
+  \begin{align*}
+    \frac{\tilde{a}_n}{a_n} \to \alpha
+    \quad \text{ and } \quad
+    \frac{\tilde{b}_n - b_n}{a_n} \to \beta ,
+  \end{align*}
+  and we have
+  \begin{align*}
+    A.G = \widetilde{G}
+    \qquad \text{ where } \; A(x) = \alpha x + \beta .
+  \end{align*}
+  In particular, $G$ and $\widetilde{G}$ have the same type.
+\end{corollary}
+\begin{proof}
+  \uses{thm:convergence-to-types-different-affine}
+  % \leanok
+  Suppose that $A_n.F_n \tendsinlaw G$ and
+  $\widetilde{A}_n.F_n \tendsinlaw \widetilde{G}$.
+
+  Applying the convergence to types theorem,
+  Theorem~\ref{thm:convergence-to-types}, to the sequence $(A_n.F_n)_{n \in \bN}$
+  of c.d.f.s and to the sequence of transformations
+  $\big( \widetilde{A}_n \circ A_n^{-1} \big)_{n \in \bN}$, we get that
+  $G$ and $\widetilde{G}$ must be of the same type, i.e., there exists a
+  $A \in \OriAffR$ such that $A.\widetilde{G} = G$.
+
+  We then get
+  \begin{align*}
+    (A \circ \widetilde{A}_n).F_n = A.(\widetilde{A}_n.F_n) \tendsinlaw A.\widetilde{G} = G
+  \end{align*}
+  (by continuity of the action of affine transforms on distributions).
+  Theorem~\ref{thm:convergence-to-types-different-affine} then applies.
+  %To express its conclusion conveniently, write $A^{-1}(x) = \alpha x + \beta$
+  %(so that $A(x) = \alpha^{-1} (x - \beta)$)
+  %and $\widetilde{A}_n(x) = \tilde{a}_n x + \tilde{b}_n$ and
+  %$A_n(x) = a_n x + b_n$. Then we have
+  %\begin{align*}
+  %  (A \circ \widetilde{A}_n)(x) = \alpha^{-1} \big( \tilde{a}_n x + \tilde{b}_n - \beta \big)
+  %    = \alpha^{-1} \tilde{a}_n x + \alpha^{-1} (\tilde{b}_n - \beta) ,
+  %\end{align*}
+  %and the conclusion of Theorem~\ref{thm:convergence-to-types-different-affine} is
+  %\begin{align*}
+  %  \frac{\alpha^{-1} \tilde{a}_n}{a_n} \to 1
+  %  \quad \text{ and } \quad
+  %  \frac{\alpha^{-1} (\tilde{b}_n - \beta) - b_n}{a_n} \to 0 .
+  %\end{align*}
+  \ldots
+\end{proof}
+
+\begin{lemma}[A choice of normalizing constants for convergence to types]
+  \label{lemma:convergence-to-types-normalization}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf, def:cdf-type, def:lc-inverse}
+  % \lean{}
+  % \leanok
+  (It is possible to choose normalization constants for the affine
+  transformations using the left-continuous inverses of the c.d.f.s.
+  TODO: Precise statement.)
+%  Suppose that $(F_n)_{n \in \bN}$ is a sequence of c.d.f.s
+%  and $(A_n)_{n \in \bN}$ %and $(\widetilde{A}_n)_{n \in \bN}$
+%  be a sequence of oriented
+%  affine isomorphisms of $\bR$, $A_n \in \OriAffR$,
+%  such that $A_n.F_n \tendsinlaw G$ where
+%  $G$ is a nondegenerate c.d.f.
+%
+%  (TODO: The following is not quite correct. Need to assume one chooses
+%  continuity points of the left-continuous inverse.)
+%
+%  Then for any $0 < p_1 < p_2 < 1$ and $0 < p_0 < 1$, defining
+%  \begin{align*}
+%    \tilde{a}_n = \frac{1}{\lcinv{F}_n(p_2) - \lcinv{F}_n(p_1)}
+%    \quad \text{ and } \quad
+%    \tilde{b}_n = \frac{\lcinv{F}_n(p_0)}{\lcinv{F}_n(p_2) - \lcinv{F}_n(p_1)}
+%  \end{align*}
+%  we have that
+%  \begin{align*}
+%    \widetilde{A}_n.F_n \tendsinlaw \widetilde{G}
+%    \qquad \text{ where } \; \widetilde{A}_n(x) = \tilde{a}_n x + \tilde{b}_n .
+%  \end{align*}
+\end{lemma}
+\begin{proof}
+  \uses{thm:convergence-to-types-different-affine}
+  % \leanok
+  \ldots
+\end{proof}
+
+\section{Self-similarity characterizations of the extreme value distributions}
+
+\begin{lemma}[Continuous parameter extreme value limit relation]
+  \label{lem:continuous-parameter-ev-limit}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Let $F$ be a c.d.f.
+
+  \emph{(Note that below we use
+  the sequence $(F^n)_{n \in \bN}$ of $n$th powers of a fixed c.d.f.,
+  not a sequence of arbitrary c.d.f.s.
+  Recall that the $n$th power $F^n$ is the c.d.f. of the maximum
+  of $n$ independent random variables with the distribution $F$.)}
+
+  Suppose that for a sequence $(A_n)_{n \in \bN}$ of oriented
+  affine isomorphisms of $\bR$, $A_n \in \OriAffR$, we have
+  \begin{align*}
+    A_n.F^n \tendsinlaw G ,
+  \end{align*}
+  where $G$ is a c.d.f.
+
+  Then, for any $t > 0$, denoting by $G^t$ the c.d.f. given by
+  $G^t(x) = \big( G(x) \big)^t$, we have
+  \begin{align*}
+    A_{n}.F^{\lfloor n t \rfloor} \tendsinlaw G^t .
+  \end{align*}
+\end{lemma}
+
+\begin{lemma}[Self-similarity of extreme value distributions]
+  \label{lem:self-similarity-of-extreme-value-distributions}
+  \uses{def:cdf, lem:oriented-affine-action-on-cdf, def:extr-val-distr}
+  % \lean{}
+  % \leanok
+  %Let $F$ be a c.d.f.
+  %
+  %\emph{(Note that below we use
+  %the sequence $(F^n)_{n \in \bN}$ of $n$th powers of a fixed c.d.f.,
+  %not a sequence of arbitrary c.d.f.s.
+  %Recall that the $n$th power $F^n$ is the c.d.f. of the maximum
+  %of $n$ independent random variables with the distribution $F$.)}
+  %
+  %Suppose that for a sequence $(A_n)_{n \in \bN}$ of oriented
+  %affine isomorphisms of $\bR$, $A_n \in \OriAffR$, we have
+  %\begin{align*}
+  %  A_n.F^n \tendsinlaw G ,
+  %\end{align*}
+  %where $G$ is a c.d.f.
+  Suppose that $G$ is an extreme-value distribution.
+  Then there exists a family $(A_t)_{t > 0}$ of
+  oriented affine isomorphisms of $\bR$, $A_t \in \OriAffR$,
+  such that for any $t > 0$
+  \begin{align*}
+    G^t = A_t . G .
+  \end{align*}
+
+  Moreover, $t \mapsto A_t$ is a measurable homomorphism
+  of multiplicative groups $(0,+\infty) \to \OriAffR$.
+\end{lemma}
+\begin{proof}
+  \uses{lem:continuous-parameter-ev-limit, thm:convergence-to-types}
+  % \leanok
+  \ldots
+\end{proof}
+
+%\begin{lemma}[Continuous parameter limit relation]
+%  \label{lem:continuous-parameter-ev-limit}
+%  \uses{def:cdf, lem:oriented-affine-action-on-cdf}
+%  % \lean{}
+%  % \leanok
+%  Let $F$ be a c.d.f.
+%
+%  Suppose that for a sequence $(A_n)_{n \in \bN}$ of oriented
+%  affine isomorphisms of $\bR$, and for a family $(G_t)_{t > 0}$
+%  of c.d.f.s, \ldots.
+%
+%
+%  and any $t > 0$, we have
+%  we have
+%  \begin{align*}
+%    A_n.F^n \tendsinlaw G_t ,
+%  \end{align*}
+%  where $G_t$ is a nondegenerate c.d.f.
+%
+%  Then, for any $t > 0$, denoting by $G^t$ the c.d.f. given by
+%  $G^t(x) = \big( G(x) \big)^t$, we have
+%  \begin{align*}
+%    A_{n}.F^{\lfloor n t \rfloor} \tendsinlaw G^t .
+%  \end{align*}
+%\end{lemma}
+
+%%\begin{lemma}[Functional equation in one parameter subgroups of affine isomorphisms]
+%%  \label{lem:affine-one-parameter-subgroup}
+%%  \uses{def:lem:oriented-affine-action-on-cdf}
+%%  % \lean{}
+%%  % \leanok
+%%  Suppose that $(A_t)_{t > 0}$ is a family of affine isomorphisms of $\bR$
+%%  such that
+%%  \begin{align*}
+%%    A_{s t} = A_s \circ A_t  \qquad \text{ for any } s, t > 0 .
+%%  \end{align*}
+%%  Write $A_t(x) = a_t x + b_t$, with $a_t > 0$ and $b_t \in \bR$.
+%%  Then we have, for any $s, t > 0$,
+%%  \begin{align*}
+%%    a_{t s} = \; & a_t \, a_s
+%%      \qquad \text{ and } \\
+%%    b_{t s} = \; & a_t \, b_s + b_t .
+%%  \end{align*}
+%%  (Also by symmetry $b_{t s} = a_s \, b_t + b_s$.)
+%%\end{lemma}
+%%\begin{proof}
+%%  % \uses{}
+%%  % \leanok
+%%\end{proof}
+%%
+%%\begin{lemma}[Functional equation scaling coefficient solution]
+%%  \label{lem:solution-functional-eqn-scaling}
+%%  %\uses{def:lem:oriented-affine-action-on-cdf}
+%%  % \lean{}
+%%  % \leanok
+%%  Suppose that $a \colon (0,+\infty) \to (0,+\infty)$ is a
+%%  measurable function satisfying, for any $s, t > 0$,
+%%  \begin{align*}
+%%    a(t s) = \; & a(t) \, a(s) .
+%%  \end{align*}
+%%  Then there exists a $\theta \in \bR$ such that for all $t > 0$,
+%%  \begin{align*}
+%%    a(t) = t^{\theta} .
+%%  \end{align*}
+%%\end{lemma}
+%%\begin{proof}
+%%  % \uses{}
+%%  % \leanok
+%%\end{proof}
+%%
+%%\begin{lemma}[Functional equation translation coefficient solution with $\theta = 0$]
+%%  \label{lem:solution-functional-eqn-translation-no-scaling}
+%%  %\uses{def:lem:oriented-affine-action-on-cdf}
+%%  % \lean{}
+%%  % \leanok
+%%  Suppose that
+%%  $b \colon (0,+\infty) \to \bR$ is a measurable function
+%%  satisfying, for any $s, t > 0$,
+%%  \begin{align*}
+%%    b(t s) = \; & b(s) + b(t) .
+%%  \end{align*}
+%%  Then there exists a constant $c$ such that for $t \in (0,+\infty)$
+%%  we have
+%%  \begin{align*}
+%%    b(t) = \; & -c \, \log (t) .
+%%  \end{align*}
+%%\end{lemma}
+%%\begin{proof}
+%%  % \uses{}
+%%  % \leanok
+%%\end{proof}
+%%
+%%\begin{lemma}[Functional equation translation coefficient solution with $\theta \ne 0$]
+%%  \label{lem:solution-functional-eqn-translation-with-scaling}
+%%  %\uses{def:lem:oriented-affine-action-on-cdf}
+%%  % \lean{}
+%%  % \leanok
+%%  Suppose that $\theta \in \bR \setminus 0$ and
+%%  $b \colon (0,+\infty) \to \bR$ is a measurable function
+%%  satisfying, for any $s, t > 0$,
+%%  \begin{align*}
+%%    b(t s) = \; & t^{\theta} \, b(s) + b(t) .
+%%  \end{align*}
+%%  Then there exists a constant $c$ such that for $t \in (0,+\infty) \setminus \set{1}$
+%%  we have
+%%  \begin{align*}
+%%    b(t) = \; & c (1 - t^{-\theta}) .
+%%  \end{align*}
+%%\end{lemma}
+%%\begin{proof}
+%%  % \uses{}
+%%  % \leanok
+%%\end{proof}
+
+\begin{lemma}[Self-similar continuous c.d.f. family characterization $\gamma = 0$]
+  \label{lem:characterization-self-similar-family-zero-index}
+  \uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that $G$ is a nondegenerate c.d.f. such that
+  \begin{align*}
+    G^{t} = A_t . G \qquad \text{ for any } t > 0 ,
+  \end{align*}
+  where
+  \begin{align*}
+    A_t(x) = x + \beta \, \log t
+  \end{align*}
+  with $\beta > 0$.
+
+  Then with $d = \log \big(-\log G(0) \big)$,
+  for all $x \in \bR$ we have
+  \begin{align*}
+    G(x) = \exp \Big( - \exp \big( -\beta^{-1} x + d \big) \Big) .
+  \end{align*}
+  (In particular, $G$ is of Gumbel type: there exists an $A \in \OriAffR$
+  such that $G = A.\GumbelCDF$.)
+\end{lemma}
+\begin{proof}
+  %\uses{lem:solution-functional-eqn-translation-no-scaling}
+  % \leanok
+
+  Since $G$ is nondegenerate, there exists an $x_0 \in \bR$
+  with $0 < G(x_0) < 1$. Write $q = -\log G(x_0) > 0$,
+  so that $G(x_0) = e^{-q}$.
+
+  For $t > 0$, from the equation $G^{t} = A_t . G$
+  we get for any $x \in \bR$
+  \begin{align*}
+  G(x)^t = G \big( A_t^{-1}(x) \big) = G \big( x - \beta \, \log(t) \big) .
+  \end{align*}
+  In particular, with $x = x_0 + \beta \, \log(t)$, we get
+  \begin{align*}
+    G\big( x_0 + \beta \, \log(t) \big)^{t} = G(x_0) = e^{- q},
+  \end{align*}
+  from which we can solve
+  \begin{align*}
+    G\big( x_0 + \beta \, \log(t) \big) = e^{-q/t} .
+  \end{align*}
+  The above holds for any $t>0$, and any $x \in \bR$
+  can be written as $x = x_0 + \beta \, \log\big( e^{(x - x_0)/\beta} \big)$.
+  We therefore get, for any $x \in \bR$,
+  \begin{align*}
+    G(x) = \exp \Big( - q \, \exp \big( -(x-x_0)/\beta \big) \Big) .
+  \end{align*}
+  This is of the desired form, with $d = \frac{x_0}{\beta} + \log(q)$.
+  Plugging in $x = 0$ then shows $d = \log \big(-\log G(0) \big)$.
+\end{proof}
+
+\begin{lemma}[Self-similar continuous c.d.f. family characterization $\gamma > 0$]
+  \label{lem:characterization-self-similar-family-pos-index}
+  \uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that $G$ is a nondegenerate c.d.f. such that
+  \begin{align*}
+    G^{t} = A_t . G \qquad \text{ for any } t > 0 ,
+  \end{align*}
+  where
+  \begin{align*}
+    A_t(x) = t^{\alpha} x + c \, (1 - t^{\alpha}) = t^{\alpha} (x-c) + c
+  \end{align*}
+  with $c \in \bR$ and $\alpha > 0$.
+
+  Then with $\sigma = \big(- \log G(c+1)\big)^{\alpha}$,
+  for all $x \ge c$ we have
+  \begin{align*}
+    G(x) = \exp \Big( - \big( \frac{x - c}{\sigma} \big)^{-1/\alpha} \big) \Big) .
+  \end{align*}
+
+  (It easily follows that $G$ is of Fr\'echet type: there exists
+  an $A \in \OriAffR$ such that $G = A.\FrechetCDF{\alpha}$.)
+\end{lemma}
+\begin{proof}
+  %\uses{lem:solution-functional-eqn-translation-with-scaling}
+  % \leanok
+
+  Since $G$ is nondegenerate, there exists an $x_0 \in \bR$
+  with $0 < G(x_0) < 1$. Write $q = -\log G(x_0) > 0$,
+  so that $G(x_0) = e^{-q}$.
+
+  %Note that
+  %\begin{align*}
+  %  A_t^{-1}(x) = t^{-\alpha} x + c (1 - t^{-\alpha}) = t^{-\alpha} (x-c) + c .
+  %\end{align*}
+  For $t > 0$, from the equation $G^{t} = A_t . G$
+  we get for any $x \in \bR$
+  \begin{align*}
+  G(x)^t = G \big( A_t^{-1}(x) \big) . %= G \big( t^{-\alpha} (x-c) + c \big) .
+  \end{align*}
+
+  Note that for $x \le c$ and $t = 2$ we have $A_2^{-1}(x) = 2^{-\alpha}(x-c) + c \ge x$,
+  so the above implies $G(x)^2 = G(A_2^{-1}(x)) \ge G(x)$.
+  This not possible if $0 < G(x) < 1$, so we must in particular have $x_0 > c$.
+
+  With $x = A_t(x_0)$ in the above equation, %= t^{\alpha} (x_0-c) + c$,
+  we get
+  \begin{align*}
+    G\big( A_t(x_0) \big)^{t} = G(x_0) = e^{- q},
+  \end{align*}
+  from which we can solve
+  \begin{align*}
+    G(x) = G\big( A_t(x_0) \big) = e^{-q/t} .
+  \end{align*}
+
+  %The above holds for any $t>0$.
+  Any $x \ge c$ can be written as $x = A_t(x_0) = t^{\alpha} (x_0-c) + c$
+  with $t = \big( \frac{x - c}{x_0 - c} \big)^{1/\alpha}$
+  (recall that $x_0 - c > 0$).
+  We therefore get, for any $x \ge c$,
+  \begin{align*}
+    G(x) = \exp \Big( - q \, \big( \frac{x - c}{x_0 - c} \big)^{-1/\alpha} \big) \Big) .
+  \end{align*}
+  This is of the form
+  \begin{align*}
+    G(x) = \exp \Big( - \big( \frac{x - c}{\sigma} \big)^{-1/\alpha} \big) \Big) ,
+  \end{align*}
+  and plugging in $x = c + 1$ yields $\sigma = \big(- \log G(c+1)\big)^{\alpha}$.
+  %This is of the desired form, with $d = \frac{x_0}{c} + \log(q)$.
+  %Plugging in $x = 0$ then shows $d = \log \big(-\log G(0) \big)$.
+\end{proof}
+
+\begin{lemma}[Self-similar continuous c.d.f. family characterization $\gamma < 0$]
+  \label{lem:characterization-self-similar-family-neg-index}
+  \uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that $G$ is a nondegenerate c.d.f. such that
+  \begin{align*}
+    G^{t} = A_t . G \qquad \text{ for any } t > 0 ,
+  \end{align*}
+  where
+  \begin{align*}
+    A_t(x) = t^{-\alpha} x + c \, (1 - t^{-\alpha}) = t^{-\alpha} (x-c) + c
+  \end{align*}
+  with $c \in \bR$ and $\alpha > 0$.
+
+  Then with $\sigma = \big(- \log G(c-1)\big)^{-\alpha}$,
+  for all $x \le c$ we have
+  \begin{align*}
+    G(x) = \exp \Big( - \big( \frac{c - x}{\sigma} \big)^{1/\alpha} \big) \Big) .
+  \end{align*}
+
+  (It easily follows that $G$ is of Weibull type: there exists
+  an $A \in \OriAffR$ such that $G = A.\WeibullCDF{\alpha}$.)
+\end{lemma}
+\begin{proof}
+  %\uses{lem:solution-functional-eqn-scaling,
+  %  lem:solution-functional-eqn-translation-exp-zero}
+  % \leanok
+
+  Since $G$ is nondegenerate, there exists an $x_0 \in \bR$
+  with $0 < G(x_0) < 1$. Write $q = -\log G(x_0) > 0$,
+  so that $G(x_0) = e^{-q}$.
+
+  %Note that
+  %\begin{align*}
+  %  A_t^{-1}(x) = t^{-\alpha} x + c (1 - t^{-\alpha}) = t^{-\alpha} (x-c) + c .
+  %\end{align*}
+  For $t > 0$, from the equation $G^{t} = A_t . G$
+  we get for any $x \in \bR$
+  \begin{align*}
+  G(x)^t = G \big( A_t^{-1}(x) \big) . %= G \big( t^{-\alpha} (x-c) + c \big) .
+  \end{align*}
+
+  Note that for $x \ge c$ and $t = 2$ we have $A_2^{-1}(x) = 2^{\alpha}(x-c) + c \ge x$,
+  so the above implies $G(x)^2 = G(A_2^{-1}(x)) \ge G(x)$.
+  This not possible if $0 < G(x) < 1$, so we must in particular have $x_0 < c$.
+
+  With $x = A_t(x_0)$ in the above equation, %= t^{\alpha} (x_0-c) + c$,
+  we get
+  \begin{align*}
+    G\big( A_t(x_0) \big)^{t} = G(x_0) = e^{- q},
+  \end{align*}
+  from which we can solve
+  \begin{align*}
+    G(x) = G\big( A_t(x_0) \big) = e^{-q/t} .
+  \end{align*}
+
+  %The above holds for any $t>0$.
+  Any $x \le c$ can be written as $x = A_t(x_0) = t^{-\alpha} (x_0-c) + c$
+  with $t = \big( \frac{c - x}{c - x_0} \big)^{-1/\alpha}$
+  (recall that $c - x_0 > 0$).
+  We therefore get, for any $x \le c$,
+  \begin{align*}
+    G(x) = \exp \Big( - q \, \big( \frac{c - x}{c - x_0} \big)^{1/\alpha} \big) \Big) .
+  \end{align*}
+  This is of the form
+  \begin{align*}
+    G(x) = \exp \Big( - \big( \frac{c - x}{\sigma} \big)^{1/\alpha} \big) \Big) ,
+  \end{align*}
+  and plugging in $x = c - 1$ yields $\sigma = \big(- \log G(c-1)\big)^{-\alpha}$.
+  %This is of the desired form, with $d = \frac{x_0}{c} + \log(q)$.
+  %Plugging in $x = 0$ then shows $d = \log \big(-\log G(0) \big)$.
+\end{proof}
+
+
+\begin{theorem}[Three types of extreme value distributions]
+  \label{thm:three-types-of-extr-val-distr}
+  \uses{def:extr-val-distr,
+    def:std-Gumbel-cdf, def:std-Frechet-cdf, def:std-Weibull-cdf}
+  % \lean{}
+  % \leanok
+  Any extreme value distribution $G$ is of one of the following types:
+  \begin{description}
+    \item{($\GumbelCDF$)} \ldots
+    \item{($\FrechetCDF{{}}$)} \ldots
+    \item{($\WeibullCDF{{}}$)} \ldots
+  \end{description}
+  In particular, $G$ has either the type of the Gumber c.d.f. $\GumbelCDF$,
+  the Fr\'echet c.d.f. $\FrechetCDF{\alpha}$ for some $\alpha > 0$, or
+  the Weibull c.d.f. $\WeibullCDF{\alpha}$ for some $\alpha > 0$.
+\end{theorem}
+\begin{proof}
+  \uses{thm:one-parameter-subgroups-of-affine-isomorphisms,
+    lem:self-similarity-of-extreme-value-distributions,
+    lem:characterization-self-similar-family-zero-index,
+    lem:characterization-self-similar-family-pos-index,
+    lem:characterization-self-similar-family-neg-index}
+  % \leanok
+  \ldots
+\end{proof}

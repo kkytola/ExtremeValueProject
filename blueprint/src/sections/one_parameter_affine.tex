@@ -1,0 +1,131 @@
+\chapter{One-parameter subgroups of affine isomorphisms}
+
+%The group $\OriAffR$ is isomorphic to the matrix group
+%\begin{align*}
+%  \left\{ \left[ \begin{array}{cc} a & b \\ 0 & 1 \end{array} \right] \; \Bigg|
+%    \; a>0, b \in \bR \right\} .
+%\end{align*}
+%This is a 2-dimensional Lie group with Lie algebra\ldots
+
+
+\begin{lemma}[Functional equation in one parameter subgroups of affine isomorphisms]
+  \label{lem:affine-one-parameter-subgroup-functional-eqn}
+  \uses{def:oriented-affine-isomorphism}
+  % \lean{}
+  % \leanok
+  Suppose that $t \mapsto A_t$ is a homomorphism of multiplicative groups
+  $(0,+\infty) \to \OriAffR$, i.e., for any $s, t > 0$ we have
+  \begin{align*}
+    A_{s t} = A_s \circ A_t .
+  \end{align*}
+  Write $A_t(x) = a_t x + b_t$, with $a_t > 0$ and $b_t \in \bR$.
+  Then we have, for any $s, t > 0$,
+  \begin{align*}
+    a_{t s} = \; & a_t \, a_s
+      \qquad \text{ and } \\
+    b_{t s} = \; & a_t \, b_s + b_t .
+  \end{align*}
+  (Also by symmetry $b_{t s} = a_s \, b_t + b_s$.)
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+\end{proof}
+
+\begin{lemma}[Functional equation scaling coefficient solution]
+  \label{lem:solution-functional-eqn-scaling}
+  %\uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that $a \colon (0,+\infty) \to (0,+\infty)$ is a
+  measurable function satisfying, for any $s, t > 0$,
+  \begin{align*}
+    a(t s) = \; & a(t) \, a(s) .
+  \end{align*}
+  Then there exists a $\rho \in \bR$ such that for all $t > 0$,
+  \begin{align*}
+    a(t) = t^{\rho} .
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+\end{proof}
+
+\begin{lemma}[Functional equation translation coefficient solution with $\rho = 0$]
+  \label{lem:solution-functional-eqn-translation-no-scaling}
+  %\uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that
+  $b \colon (0,+\infty) \to \bR$ is a measurable function
+  satisfying, for any $s, t > 0$,
+  \begin{align*}
+    b(t s) = \; & b(s) + b(t) .
+  \end{align*}
+  Then there exists a constant $c$ such that for $t \in (0,+\infty)$
+  we have
+  \begin{align*}
+    b(t) = \; & -c \, \log (t) .
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  \uses{lem:solution-functional-eqn-scaling}
+  % \leanok
+\end{proof}
+
+\begin{lemma}[Functional equation translation coefficient solution with $\rho \ne 0$]
+  \label{lem:solution-functional-eqn-translation-with-scaling}
+  %\uses{def:lem:oriented-affine-action-on-cdf}
+  % \lean{}
+  % \leanok
+  Suppose that $\rho \in \bR \setminus \set{0}$ and
+  $b \colon (0,+\infty) \to \bR$ is a measurable function
+  satisfying, for any $s, t > 0$,
+  \begin{align*}
+    b(t s) = \; & t^{\rho} \, b(s) + b(t) .
+  \end{align*}
+  Then there exists a constant $c$ such that for $t \in (0,+\infty) \setminus \set{1}$
+  we have
+  \begin{align*}
+    b(t) = \; & c (1 - t^{-\rho}) .
+  \end{align*}
+\end{lemma}
+\begin{proof}
+  \uses{lem:solution-functional-eqn-scaling}
+  % \leanok
+\end{proof}
+
+\begin{theorem}[One-parameter subgroups of affine isomorphisms of $\bR$]
+  \label{thm:one-parameter-subgroups-of-affine-isomorphisms}
+  %\uses{def:}
+  % \lean{}
+  % \leanok
+  Suppose that $t \mapsto A_t$ is a measurable homomorphism of multiplicative groups
+  $(0,+\infty) \to \OriAffR$, i.e., for any $s, t > 0$ we have
+  \begin{align*}
+    A_{s t} = A_s \circ A_t
+  \end{align*}
+  and $A_t(x) = a_t x + b_t$, with $t \mapsto a_t$ and $t \mapsto b_t$
+  measurable functions.
+  Then either
+  \begin{description}
+    \item[(0)] there exists a $\beta \in \bR$ such that for all $t > 0$ and $x \in \bR$
+      \begin{align*}
+        A_t(x) = x + \beta \, \log(t) ;
+      \end{align*}
+      or
+    \item[(1)] there exists a $\rho \ne 0$ and $c \in \bR$ such that
+      for all $t > 0$ and $x \in \bR$
+      \begin{align*}
+        A_t(x) = t^{\rho} (x - c) + c .
+      \end{align*}
+  \end{description}
+\end{theorem}
+\begin{proof}
+  \uses{lem:affine-one-parameter-subgroup-functional-eqn,
+    lem:solution-functional-eqn-scaling,
+    lem:solution-functional-eqn-translation-no-scaling,
+    lem:solution-functional-eqn-translation-with-scaling}
+  % \leanok
+\end{proof}

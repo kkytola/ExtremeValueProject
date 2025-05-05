@@ -5,8 +5,8 @@
 \begin{lemma}[Second order differential equation for Q]
   \label{lem:ode-of-order-two-for-Q}
   %\uses{}
-  %\lean{}
-  % \leanok
+  \lean{ExtremeValueProject.ode_of_order_two_for_Q}
+  \leanok
   Suppose that
   \begin{align*}
   Q \colon \bR \to \bR
@@ -22,7 +22,7 @@
   for some $\alpha \colon \bR \to \bR$ and every $s,h \in \bR$.
   Then $Q$ is twice continuously differentiable and satisfies
   \begin{align}
-    Q'' (s) = Q'(s) \, Q'' (0) \qquad \text{ for every } s \in \bR .
+    Q''(s) = Q'(s) \, Q''(0) \qquad \text{ for every } s \in \bR .
   \end{align}
 \end{lemma}
 \begin{proof}
@@ -76,14 +76,14 @@
 \begin{lemma}[Solution for Q]
   \label{lem:solve-Q}
   %\uses{}
-  %\lean{}
-  % \leanok
+  \lean{ExtremeValueProject.solve_Q}
+  \leanok
   Suppose that $Q \colon \bR \to \bR$ is twice continuously differentiable
   and $Q'$ is positive and $Q$
   and satisfies $Q(0)=0$, $Q'(0) = 1$, and the equation concluded in
   Lemma~\ref{lem:ode-of-order-two-for-Q} with $\gamma = Q''(0)$, i.e.,
   \begin{align}\label{eq: Q eqn dd}
-  Q'' (s) = \gamma \, Q'(s) \qquad \text{ for every } s \in \bR .
+  Q''(s) = \gamma \, Q'(s) \qquad \text{ for every } s \in \bR .
   \end{align}
   Then $Q$ is given by
   \begin{align*}
@@ -140,14 +140,15 @@
 \begin{proof}
   %\uses{}
   \leanok
+  \mathlibok
   (The proof is already in Mathlib.)
 \end{proof}
 
 \begin{lemma}[Solution for E]
   \label{lem:solve-E}
   %\uses{lem:solve-Q}
-  %\lean{}
-  % \leanok
+  \lean{ExtremeValueProject.solve_E}
+   \leanok
   Suppose that $E \colon (0,\infty) \to \bR$
   is nondecreasing and nonconstant function which satisfies $E(1) = 0$ and
   \begin{align*}
