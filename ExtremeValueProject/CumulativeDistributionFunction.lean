@@ -93,11 +93,25 @@ instance : CoeFun CumulativeDistributionFunction (fun _ ↦ ℝ → ℝ) where
 
 lemma apply_nonneg (F : CumulativeDistributionFunction) (x : ℝ) :
     0 ≤ F x := by
-  sorry -- **Issue #9**
+  -- **Issue #9**
+  have h1: Monotone F := by
+    exact F.mono'
+
+  have F_tendsto_bot : Tendsto F atBot (𝓝 (0 : ℝ)) := by
+    exact F.tendsto_atBot
+
+  exact Monotone.le_of_tendsto h1 F_tendsto_bot x
 
 lemma apply_le_one (F : CumulativeDistributionFunction) (x : ℝ) :
     F x ≤ 1 := by
-  sorry -- **Issue #9**
+  -- **Issue #9**
+  have F_mono: Monotone F := by
+    exact F.mono'
+
+  have F_tendsto_top: Tendsto F atTop (𝓝 (1 : ℝ)) := by
+    exact F.tendsto_atTop
+
+  exact Monotone.ge_of_tendsto F_mono F_tendsto_top x
 
 lemma apply_eq_measure_Iic (F : CumulativeDistributionFunction) (x : ℝ) :
     F x = ENNReal.toReal (F.measure (Iic x)) := by
