@@ -93,7 +93,6 @@ instance : CoeFun CumulativeDistributionFunction (fun _ ↦ ℝ → ℝ) where
 
 lemma apply_nonneg (F : CumulativeDistributionFunction) (x : ℝ) :
     0 ≤ F x := by
-  -- **Issue #9**
   have h1: Monotone F := by
     exact F.mono'
 
@@ -104,7 +103,6 @@ lemma apply_nonneg (F : CumulativeDistributionFunction) (x : ℝ) :
 
 lemma apply_le_one (F : CumulativeDistributionFunction) (x : ℝ) :
     F x ≤ 1 := by
-  -- **Issue #9**
   have F_mono: Monotone F := by
     exact F.mono'
 
