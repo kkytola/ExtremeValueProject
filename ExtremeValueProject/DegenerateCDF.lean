@@ -121,10 +121,7 @@ lemma _root_.MeasureTheory.diracProba_apply {X : Type*} [MeasurableSpace X]
 
 lemma cdf_diracProba_apply (x₀ x : ℝ) :
     (diracProba x₀).cdf x = if x < x₀ then 0 else 1 := by
-  unfold ProbabilityMeasure.cdf FiniteMeasure.cdf
-  simp
-  rw [diracProba_apply x₀]
-  unfold Set.indicator
+  simp [ProbabilityMeasure.cdf, FiniteMeasure.cdf, diracProba_apply x₀, Set.indicator]
   by_cases h : x₀ ≤ x
   · simp [not_lt_of_ge h]
   · simp [lt_of_not_ge h]
