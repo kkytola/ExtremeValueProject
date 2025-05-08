@@ -97,13 +97,7 @@ lemma apply_nonneg (F : CumulativeDistributionFunction) (x : ℝ) :
 
 lemma apply_le_one (F : CumulativeDistributionFunction) (x : ℝ) :
     F x ≤ 1 := by
-  have F_mono: Monotone F := by
-    exact F.mono'
-
-  have F_tendsto_top: Tendsto F atTop (𝓝 (1 : ℝ)) := by
-    exact F.tendsto_atTop
-
-  exact Monotone.ge_of_tendsto F_mono F_tendsto_top x
+  exact F.mono'.ge_of_tendsto F.tendsto_atTop x
 
 lemma apply_eq_measure_Iic (F : CumulativeDistributionFunction) (x : ℝ) :
     F x = ENNReal.toReal (F.measure (Iic x)) := by
