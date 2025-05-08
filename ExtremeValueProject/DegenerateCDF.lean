@@ -24,7 +24,84 @@ lemma isDegenerate_def (F : CumulativeDistributionFunction) :
 /-- A c.d.f. F is degenerate if and only if it jumps from 0 to 1 at some point x₀. -/
 lemma isDegenerate_iff (F : CumulativeDistributionFunction) :
     F.IsDegenerate ↔ ∃ x₀, F.toFun = (Set.Ici x₀).indicator (fun _ ↦ 1) := by
-  sorry -- **Issue #12**
+  constructor
+  · intro is_degen
+
+    have obs (x : ℝ) : F x = 1 ↔ F x ≠ 0 := by
+      constructor
+      · intro h
+        exact ne_zero_of_eq_one h
+      · intro hx
+        cases is_degen x
+        · contradiction
+        · assumption
+
+    have approaches_zero := isGLB_of_tendsto_atBot F.mono F.tendsto_atBot
+    have reaches_zero : ∃ x : ℝ, F x = 0 := by
+      rw [← not_forall_not]
+      intro h
+      have F_one : F.toFun = fun (x : ℝ) => 1 := by
+        funext x
+        rw [obs]
+        exact h x
+      rw [F_one, range_const] at approaches_zero
+      have := IsGLB.unique approaches_zero isGLB_singleton
+      norm_num at this
+
+    have approaches_one := isLUB_of_tendsto_atTop F.mono F.tendsto_atTop
+    have reaches_one : ∃ x : ℝ, F x = 1 := by
+      rw [← not_forall_not]
+      intro h
+      have F_zero : F.toFun = fun (x : ℝ) => 0 := by
+        funext x
+        simp only [obs, not_not] at h
+        exact h x
+      rw [F_zero, range_const] at approaches_one
+      have := IsLUB.unique approaches_one isLUB_singleton
+      norm_num at this
+
+    have bounded_below : BddBelow {x : ℝ | F x = 1} := by
+      unfold BddBelow
+      obtain ⟨x₀, h⟩ := reaches_zero
+      use x₀
+      intro a (ha : F a = 1)
+      apply le_of_lt
+      apply Monotone.reflect_lt F.mono
+      rw [h, ha]
+      norm_num
+
+    let x₀ := sInf {x : ℝ | F x = 1}
+    have one_after_x₀ : ∀ x > x₀, F x = 1 := by
+      intro x hx
+      apply le_antisymm
+      · exact apply_le_one F x
+      · obtain ⟨x₁, ⟨is_one : F x₁ = 1, lt_x⟩⟩ := exists_lt_of_csInf_lt reaches_one hx
+        rw [← is_one]
+        exact F.mono (le_of_lt lt_x)
+    have one_after_x₀': F '' Ioi x₀ = {1} := by
+      rw [← Set.Nonempty.image_const (show (Ioi x₀).Nonempty from nonempty_Ioi)]
+      exact Set.image_congr one_after_x₀
+    have one_at_x₀ : F x₀ = 1 := by
+      rw [← F.rightLim_eq, ← csInf_singleton 1, ← one_after_x₀']
+      exact Monotone.rightLim_eq_sInf F.mono NeBot.ne'
+
+    use x₀
+    funext x
+    unfold indicator
+    simp only [mem_Ici]
+    split
+    · rename_i hx
+      cases' lt_or_eq_of_le hx with x₀_lt x₀_eq
+      · exact one_after_x₀ x x₀_lt
+      · rw [← x₀_eq]
+        exact one_at_x₀
+    · rename_i hx
+      rw [not_le] at hx
+      rw [← Iff.not_left (obs x)]
+      apply not_mem_of_lt_csInf hx bounded_below
+  · intro ⟨x₀, h⟩ x
+    rw [h]
+    simp [lt_or_le]
 
 -- TODO: This probably belongs to Mathlib?
 lemma _root_.MeasureTheory.diracProba_apply' {X : Type*} [MeasurableSpace X] (x₀ : X)
