@@ -116,7 +116,33 @@ lemma diracProba_is_degenerate (x₀ : ℝ) :
 at some point x₀. -/
 lemma eq_diracProba_of_isDegenerate (μ : ProbabilityMeasure ℝ) (degen : μ.cdf.IsDegenerate) :
     ∃ x₀, μ = diracProba x₀ := by
-  sorry -- **Issue #12**
+  rw [isDegenerate_iff] at degen
+  obtain ⟨x₀, h⟩ := degen
+  use x₀
+  ext s hs
+  rw [diracProba_toMeasure_apply, indicator, Pi.one_apply]
+  simp [ProbabilityMeasure.cdf, FiniteMeasure.cdf] at h
+  have measure_Iic_eq_one : μ.toMeasure (Iic x₀) = 1 := by
+    simpa only [← toReal_eq_one_iff, mem_Ici, le_refl, indicator_of_mem] using congr_fun h x₀
+  have measure_Iio_eq_zero : μ.toMeasure (Iio x₀) = 0 := by
+    apply measure_null_of_locally_null
+    intro x (x_lt_x₀ : x < x₀)
+    obtain ⟨x₁, ⟨x_lt_x₁, x₁_lt_x₀⟩⟩ := exists_between x_lt_x₀
+    use Iic x₁, mem_inf_of_left (Iic_mem_nhds x_lt_x₁)
+    simpa [x₁_lt_x₀] using congr_fun h x₁
+  have measure_x₀_eq_one : μ.toMeasure {x₀} = 1 := by
+    rw [← Iic_diff_Iio_same,
+        measure_diff Iio_subset_Iic_self nullMeasurableSet_Iio (measure_ne_top μ (Iio x₀)),
+        measure_Iic_eq_one,
+        measure_Iio_eq_zero,
+        tsub_zero]
+  have measure_eq_one_of_contains_x₀ {s : Set ℝ} (hx₀ : x₀ ∈ s) : μ.toMeasure s = 1 := by
+    rw [← one_le_prob_iff, ← measure_x₀_eq_one]
+    apply measure_mono
+    simpa only [singleton_subset_iff] using hx₀
+  by_cases hx₀ : x₀ ∈ s
+  · simpa [hx₀] using measure_eq_one_of_contains_x₀ hx₀
+  · simpa [hx₀, ← prob_compl_eq_one_iff hs] using measure_eq_one_of_contains_x₀ hx₀
 
 end CumulativeDistributionFunction
 
