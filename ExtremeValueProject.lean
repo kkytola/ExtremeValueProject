@@ -7,6 +7,7 @@ import «ExtremeValueProject».CumulativeDistributionFunction
 import «ExtremeValueProject».DegenerateCDF
 import «ExtremeValueProject».ExtremeValueDistribution
 import «ExtremeValueProject».LimitRelationManipulation
+import «ExtremeValueProject».OneParameterAffine
 import «ExtremeValueProject».OrderContinuity
 import «ExtremeValueProject».PseudoInverses
 import «ExtremeValueProject».TransformedCDF

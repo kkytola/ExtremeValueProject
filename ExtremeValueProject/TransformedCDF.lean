@@ -76,19 +76,20 @@ lemma extend_mono (F : CumulativeDistributionFunction) :
       have ξ_le_η : ξ ≤ η := EReal.coe_le_coe_iff.mp hxy
       exact ENNReal.ofReal_le_ofReal (F.mono ξ_le_η)
 
-lemma extend_affine (F : CumulativeDistributionFunction)
-    (A : orientationPreservingAffineEquiv) :
-    (A • F).extend = F.extend ∘ (A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).extend := by
+lemma extend_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
+    (A • F).extend = F.extend ∘ (A⁻¹).extend := by
   ext x
-  simp [extend]
+  simp only [extend, mulAction_apply_eq, Function.comp_apply]
   match x with
   | ⊥ =>
-    simp [show 0 < (A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).toAffineMap.coefs_of_field.1 from Subgroup.inv_mem _ A.prop]
+    rw [AffineIncrEquiv.extend_bot]
   | ⊤ =>
-    simp [show 0 < (A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).toAffineMap.coefs_of_field.1 from Subgroup.inv_mem _ A.prop]
+    rw [AffineIncrEquiv.extend_top]
   | some (some ξ) =>
-    change (A • F).extend ξ = F.extend ((A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).extend ξ)
-    simp [extend_ofReal]
+    have aux : (A • F).extend ξ = F.extend ((A⁻¹).extend ξ) := by
+      simp only [extend_ofReal, mulAction_apply_eq, AffineEquiv.extend_ofReal]
+      congr
+    exact aux
 
 lemma extend_continuousAt_bot (F : CumulativeDistributionFunction) :
     ContinuousAt F.extend ⊥ := by
@@ -219,9 +220,8 @@ lemma oneDivOneSub_continuousAt_iff (F : CumulativeDistributionFunction) (x : �
     ContinuousAt F.oneDivOneSub x ↔ ContinuousAt F x := by
   sorry -- (maybe could be done together with issue 31)
 
-lemma oneDivOneSub_affine (F : CumulativeDistributionFunction)
-    (A : orientationPreservingAffineEquiv) :
-    ((A • F).oneDivOneSub) = F.oneDivOneSub ∘ (A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).extend := by
+lemma oneDivOneSub_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
+    ((A • F).oneDivOneSub) = F.oneDivOneSub ∘ (A⁻¹).extend := by
   ext x
   simp [oneDivOneSub, extend_affine]
 
@@ -238,11 +238,10 @@ lemma rcInvOneDivOneSub_mono (F : CumulativeDistributionFunction) :
 -- TODO: What is the good statement about continuity of F.rcInvOneDivOneSub at `u ∈ (1,+∞)`?
 -- The hypothesis should be continuity and local increase of `F` at `F⁻¹ (1 - 1/u)`?
 
-lemma rcInvOneDivOneSub_affine (F : CumulativeDistributionFunction)
-    (A : orientationPreservingAffineEquiv) :
-    ((A • F).rcInvOneDivOneSub) = (A : ℝ ≃ᵃ[ℝ] ℝ).extend ∘ F.rcInvOneDivOneSub := by
+lemma rcInvOneDivOneSub_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
+    ((A • F).rcInvOneDivOneSub) = A.extend ∘ F.rcInvOneDivOneSub := by
   rw [rcInvOneDivOneSub, oneDivOneSub_affine]
-  apply rcInv_comp F.oneDivOneSub (A⁻¹ : AffineEquiv _ _ _).extend ?_
+  apply rcInv_comp F.oneDivOneSub (A⁻¹).extend ?_
   exact AffineMap.leftOrdContinuous_extend _
 
 end CumulativeDistributionFunction
@@ -340,9 +339,8 @@ lemma oneDivNegLog_continuousAt_iff (F : CumulativeDistributionFunction) (x : �
     ContinuousAt F.oneDivNegLog x ↔ ContinuousAt F x := by
   sorry -- (maybe could be done together with issue 32)
 
-lemma oneDivNegLog_affine (F : CumulativeDistributionFunction)
-    (A : orientationPreservingAffineEquiv) :
-    ((A • F).oneDivNegLog) = F.oneDivNegLog ∘ (A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ).extend := by
+lemma oneDivNegLog_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
+    ((A • F).oneDivNegLog) = F.oneDivNegLog ∘ (A⁻¹).extend := by
   ext x
   simp [oneDivNegLog, extend_affine]
 
@@ -356,11 +354,10 @@ lemma rcInvOneDivNegLog_mono (F : CumulativeDistributionFunction) :
     Monotone F.rcInvOneDivNegLog :=
   rcInv_mono F.oneDivNegLog
 
-lemma rcInvOneDivNegLog_affine (F : CumulativeDistributionFunction)
-    (A : orientationPreservingAffineEquiv) :
-    ((A • F).rcInvOneDivNegLog) = (A : ℝ ≃ᵃ[ℝ] ℝ).extend ∘ F.rcInvOneDivNegLog := by
+lemma rcInvOneDivNegLog_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
+    ((A • F).rcInvOneDivNegLog) = A.extend ∘ F.rcInvOneDivNegLog := by
   rw [rcInvOneDivNegLog, oneDivNegLog_affine]
-  apply rcInv_comp F.oneDivNegLog (A⁻¹ : AffineEquiv ..).extend ?_
+  apply rcInv_comp F.oneDivNegLog (A⁻¹).extend ?_
   exact AffineMap.leftOrdContinuous_extend _
 
 end CumulativeDistributionFunction
@@ -373,7 +370,7 @@ section equivalent_ev
 open Topology Filter
 
 lemma oneDivSub_limit_iff {F G : CumulativeDistributionFunction}
-    (As : ℕ → orientationPreservingAffineEquiv) {x : ℝ} (hGx : G x ∈ Ioo 0 1) :
+    (As : ℕ → AffineIncrEquiv) {x : ℝ} (hGx : G x ∈ Ioo 0 1) :
     (Tendsto (fun n ↦ 1/(n * (1 - (((As n) • F) x)))) atTop (𝓝 (1/(-(Real.log (G x))))))
       ↔ (Tendsto (fun (n : ℕ) ↦ (n : ℝ≥0∞)⁻¹ * (((As n) • F).oneDivOneSub x))
           atTop (𝓝 (G.oneDivNegLog x))) := by

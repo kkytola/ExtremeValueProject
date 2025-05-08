@@ -42,12 +42,12 @@ lemma exists₂_continuousAt_of_not_isDegenerate
   sorry -- **Issue #38**
 
 lemma unique_orientationPreservingAffineEquiv_smul_eq_not_isDegenerate
-    {F G : CumulativeDistributionFunction} {A₁ A₂ : orientationPreservingAffineEquiv}
+    {F G : CumulativeDistributionFunction} {A₁ A₂ : AffineIncrEquiv}
     (hG : ¬ G.IsDegenerate) (h₁ : A₁ • F = G) (h₂ : A₂ • F = G) :
     A₁ = A₂ := by
   sorry -- **Issue #39**
 
-open orientationPreservingAffineEquiv in
+open AffineIncrEquiv in
 /-- If we have c.d.f. convergence `Fₙ → G` and `Aₙ • Fₙ → G'`, where `Aₙ(x) = aₙ * x + bₙ`
 with `aₙ → 0` and `bₙ → β`, then `G'(x) = 0` for all `x < β`. -/
 lemma apply_eq_zero_of_tendsto_of_lt
@@ -61,7 +61,7 @@ lemma apply_eq_zero_of_tendsto_of_lt
     G x = 0 := by
   sorry
 
-open orientationPreservingAffineEquiv in
+open AffineIncrEquiv in
 /-- If we have c.d.f. convergence `Fₙ → G` and `Aₙ • Fₙ → G'`, where `Aₙ(x) = aₙ * x + bₙ`
 with `aₙ → 0` and `bₙ → β`, then `G'(x) = 1` for all `x > β`. -/
 lemma apply_eq_one_of_tendsto_of_gt
@@ -75,7 +75,7 @@ lemma apply_eq_one_of_tendsto_of_gt
     G x = 1 := by
   sorry
 
-open orientationPreservingAffineEquiv in
+open AffineIncrEquiv in
 /-- If we have c.d.f. convergence `Fₙ → G` and `Aₙ • Fₙ → G'`, where `Aₙ(x) = aₙ * x + bₙ`
 with `aₙ → 0` and `bₙ → β`, then `G'` is degenerate (a delta mass at `β`). -/
 lemma isDegenerate_of_tendsto_shrinking
@@ -118,7 +118,7 @@ then `Aₙ • Fₙ` cannot converge to any c.d.f. -/
 lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
     {F : ℕ → CumulativeDistributionFunction} {G G' : CumulativeDistributionFunction}
     (F_lim : ∀ x, ContinuousAt G x → Tendsto (fun n ↦ F n x) atTop (𝓝 (G x)))
-    (hG : ¬ G.IsDegenerate) {A : ℕ → orientationPreservingAffineEquiv}
+    (hG : ¬ G.IsDegenerate) {A : ℕ → AffineIncrEquiv}
     (a_lim : Tendsto (fun n ↦ (A n).val.toAffineMap.coefs_of_field.1) atTop atTop) :
     ¬ ∀ x, ContinuousAt G' x → Tendsto (fun n ↦ ((A n) • (F n)) x) atTop (𝓝 (G' x)) := by
   sorry -- **Issue #40**

@@ -401,6 +401,91 @@ $A_n(x) = a_n x + b_n$ and $A(x) = a x + b$, and $a_n \to a$ and $b_n \to b$).
   \ldots
 \end{proof}
 
+
+\section{One-parameter subgroups of affine transformations}
+
+\begin{definition}[Subgroup of translations]
+  \label{def:translation-subgroup}
+  \uses{def:oriented-affine-isomorphism}
+  \lean{AffineIncrEquiv.homOfIndex₀, AffineIncrEquiv.subGroupOfIndex₀}
+  % \leanok
+  The mapping $s \mapsto A_s$ with
+  \begin{align*}
+    A_s(x) = x + s
+  \end{align*}
+  is a homomorphism $\bR \to \OriAffR$. The image of this
+  homomorphism is the \emph{subgroup of translations} in $\OriAffR$.
+\end{definition}
+
+\begin{lemma}[Only translations have no fixed points]
+  \label{lem:no-fixed-point-implies-translation}
+  \uses{def:translation-subgroup}
+  \lean{AffineIncrEquiv.mem_subGroupOfIndex₀_of_no_fixed_point}
+  \leanok
+  If $A \in \OriAffR$ has no fixed points (no $x \in \bR$ such that $A(x) = x$)
+  then $A$ belongs to the subgroup of translations, i.e., $A(x) = x + s$
+  for some $s \in \bR$ (in fact $s \ne 0$).
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+  Let us prove this by contrapositive: that any element $A$ which is not a
+  translation must have a fixed point.
+  So assume that $A$ is not a translation, i.e.,
+  $A(x) = a x + b$ with some $a \ne 1$. Then the fixed point equation
+  $A(x) = x$ reads
+  \begin{align*}
+    a x + b = x  ,
+  \end{align*}
+  and it has a solution $x = \frac{-b}{a-1} \in \bR$, which then is a
+  fixed point of $A$.
+\end{proof}
+
+\begin{definition}[Subgroup fixing a point]
+  \label{def:fixing-subgroup}
+  \uses{def:oriented-affine-isomorphism}
+  \lean{AffineIncrEquiv.homOfIndex, AffineIncrEquiv.subGroupOfIndex}
+  % \leanok
+  The mapping $s \mapsto A_s$ with
+  \begin{align*}
+    A_s(x) = e^{s} (x - c) + c
+  \end{align*}
+  is a homomorphism $\bR \to \OriAffR$. The image of this
+  homomorphism is the \emph{subgroup fixing $c$} in $\OriAffR$.
+\end{definition}
+
+\begin{lemma}[Characterization of the subgroup fixing a point]
+  \label{lem:fixing-subgroup-characterization}
+  \uses{def:fixing-subgroup}
+  \lean{AffineIncrEquiv.mem_subGroupOfIndex_iff_fixed_point}
+  \leanok
+  An orientation-preserving affine transformation $A \in \OriAffR$
+  belongs to the subgroup fixing $c \in \bR$ if and only if $A(c) = c$.
+
+  \emph{(Note that the subgroup is a priori defined as the image of a homomorphism,
+  so the statement indeed requires a proof.)}
+\end{lemma}
+\begin{proof}
+  % \uses{}
+  % \leanok
+  Suppose first that $A$ is an element of the said subgroup, i.e.,
+  $A(x) = e^{s} (x - c) + c$ for some $s \in \bR$. Then clearly $A(c) = c$.
+
+  Suppose then that $A(c) = c$. Write $A(x) = a x + b$ for $a>0$ and $b \in \bR$.
+  Plug in $x=c$ in the assumed fixed point property to obtain
+  \begin{align*}
+    a c + b = c .
+  \end{align*}
+  The above can be solved to give $b = (1-a)c$.
+  Also since $a>0$, we can write $a = e^s$ with $s \in \bR$.
+  With these, the formula for $A$ simplifies to
+  \begin{align*}
+    A(x) = e^s x + c (1 - e^s) = e^s \big( x - c \big) + c .
+  \end{align*}
+  This shows $A = A_s$ as desired (with $A_s$ as in Definition~\ref{def:fixing-subgroup}).
+\end{proof}
+
+
 \section{Self-similarity characterizations of the extreme value distributions}
 
 \begin{lemma}[Continuous parameter extreme value limit relation]

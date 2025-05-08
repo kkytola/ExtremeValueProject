@@ -165,7 +165,7 @@
 
 \begin{definition}
   \label{def:oriented-affine-isomorphism}
-  \lean{orientationPreservingAffineEquiv}
+  \lean{AffineIncrEquiv}
   \leanok
   The collection of all transformations $\R \to \R$ of the form
   $x \mapsto a x + b$, where $a>0$, $b \in \R$, forms a group.
@@ -187,7 +187,7 @@
 \begin{lemma}
   \label{lem:oriented-affine-action-on-cdf}
   \uses{def:oriented-affine-transform-of-cdf}
-  \lean{CumulativeDistributionFunction.instMulActionOrientationPreservingAffineEquiv}
+  \lean{CumulativeDistributionFunction.instMulActionAffineIncrEquiv}
   \leanok
   The actions of orientation preserving affine isomorphisms
   on a cumulative distribution functions is a group action, i.e.,

@@ -17,13 +17,13 @@ variables up to orientation preserving affine transforms (pointwise limit on the
 points of `G`). -/
 def IsExtremeValueDistr (G : CumulativeDistributionFunction) : Prop :=
   ¬G.IsDegenerate ∧
-    ∃ (F : CumulativeDistributionFunction) (As : ℕ → orientationPreservingAffineEquiv),
+    ∃ (F : CumulativeDistributionFunction) (As : ℕ → AffineIncrEquiv),
       ∀ x, ContinuousAt G x → Tendsto (fun n ↦ ((As n • F) x)^n) atTop (𝓝 (G x))
 
 /-- Orientation preserving affine transfroms of extreme value distributions are extreme value
 distributions. -/
 lemma IsExtremeValueDistr.affineTransform (G : CumulativeDistributionFunction)
-    (G_evd : G.IsExtremeValueDistr) (A : orientationPreservingAffineEquiv) :
+    (G_evd : G.IsExtremeValueDistr) (A : AffineIncrEquiv) :
     (A • G).IsExtremeValueDistr := by
   refine ⟨by simpa [affine_isDegenerate_iff] using G_evd.1, ?_⟩
   choose F As h using G_evd.2
@@ -31,7 +31,7 @@ lemma IsExtremeValueDistr.affineTransform (G : CumulativeDistributionFunction)
   intro x AG_cont
   have G_cont := affine_continuousAt_of_continuousAt AG_cont A⁻¹
   simp only [inv_smul_smul, InvMemClass.coe_inv] at G_cont
-  exact h ((A⁻¹ : ℝ ≃ᵃ[ℝ] ℝ) x) G_cont
+  exact h (A⁻¹  x) G_cont
 
 end CumulativeDistributionFunction
 
@@ -47,7 +47,7 @@ of `G`) of the distributions of maxima of independent random variables up to ori
 preserving affine transforms  -/
 def ExtremeValueDistr.domainOfAtraction (G : ExtremeValueDistr) :
     Set CumulativeDistributionFunction :=
-  {F | ∃ (As : ℕ → orientationPreservingAffineEquiv),
+  {F | ∃ (As : ℕ → AffineIncrEquiv),
        ∀ x, ContinuousAt F x → Tendsto (fun n ↦ ((As n • G.toCDF) x)^n) atTop (𝓝 (F x))}
 
 namespace ExtremeValueDistr
