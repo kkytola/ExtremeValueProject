@@ -90,7 +90,7 @@ lemma _root_.MeasureTheory.diracProba_apply' {X : Type*} [MeasurableSpace X] (x�
     {s : Set X} (s_mble : MeasurableSet s) :
     (diracProba x₀) s = s.indicator 1 x₀ := by
   rw [diracProba, ProbabilityMeasure.mk_apply, Measure.dirac_apply' x₀ s_mble]
-  unfold Set.indicator
+  unfold indicator
   split <;> rfl
 
 -- TODO: This probably also belongs to Mathlib? (Note slightly different hypotheses to the above.)
@@ -98,12 +98,12 @@ lemma _root_.MeasureTheory.diracProba_apply {X : Type*} [MeasurableSpace X]
     [MeasurableSingletonClass X] (x₀ : X) (s : Set X) :
     (diracProba x₀) s = s.indicator 1 x₀ := by
   rw [diracProba, ProbabilityMeasure.mk_apply, Measure.dirac_apply]
-  unfold Set.indicator
+  unfold indicator
   split <;> rfl
 
 lemma cdf_diracProba_apply (x₀ x : ℝ) :
     (diracProba x₀).cdf x = if x < x₀ then 0 else 1 := by
-  simp [ProbabilityMeasure.cdf, FiniteMeasure.cdf, diracProba_apply x₀, Set.indicator]
+  simp [ProbabilityMeasure.cdf, FiniteMeasure.cdf, diracProba_apply x₀, indicator]
   by_cases h : x₀ ≤ x
   · simp [not_lt_of_ge h]
   · simp [lt_of_not_ge h]
