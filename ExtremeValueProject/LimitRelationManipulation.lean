@@ -263,7 +263,31 @@ lemma ev_limit_iff_log_ev_limit {F G : CumulativeDistributionFunction}
     {As : ℕ → AffineIncrEquiv} {x : ℝ} (hGx : G x ∈ Ioo 0 1) :
     (Tendsto (fun n ↦ ((As n • F) x)^n) atTop (𝓝 (G x)))
       ↔ (Tendsto (fun n ↦ n * Real.log (((As n) • F) x)) atTop (𝓝 (Real.log (G x)))) := by
-  sorry -- **Issue #26**
+  constructor
+  · intro h
+    simp only [← Real.log_pow, ← Function.comp_def]
+    apply Filter.Tendsto.comp ?_ h
+    exact ContinuousAt.tendsto (Real.continuousAt_log (ne_of_gt hGx.left))
+  · intro h
+    simp only [← Real.log_pow] at h
+    apply Filter.Tendsto.comp (Continuous.tendsto Real.continuous_exp _) at h
+    rw [Real.exp_log hGx.left] at h
+    let f (x : ℝ) := if x = 0 then 1 else x
+    have exp_log_of_nonneg {x : ℝ} (hx : x ≥ 0) : Real.exp (Real.log x) = f x := by
+      by_cases h : x = 0
+      · simp [f, h]
+      · simpa [f, h] using Real.exp_log (lt_of_le_of_ne hx (h ∘ Eq.symm))
+    simp only [Function.comp_def, exp_log_of_nonneg, pow_nonneg,
+               CumulativeDistributionFunction.apply_nonneg] at h
+    rw [← Function.comp_def] at h
+    apply Filter.Tendsto.of_tendsto_comp h
+    intro s hs
+    use s ∩ Iio 1, inter_mem hs (Iio_mem_nhds hGx.right)
+    intro a ha
+    by_cases h : a = 0
+    · simp [f, h] at ha
+    · have : a ∈ s ∧ a < 1 := by simpa [f, h] using ha
+      exact this.left
 
 lemma tendsto_one_of_ev_limit {F G : CumulativeDistributionFunction}
     {As : ℕ → AffineIncrEquiv} {x : ℝ} (hGx : G x ∈ Ioo 0 1)
