@@ -85,10 +85,11 @@ lemma apply_eq_one_of_tendsto_of_gt
 
     -- Choose `z'` s.t. `G(z') > 1 - ε'` where `ε' := ε/2`
     set ε' := ε/2 with hε'
-    have G_lim := G.tendsto_atTop (show Ioi (1-ε') ∈ 𝓝 1 from Ioi_mem_nhds (by linarith))
-    simp only [mem_map, mem_atTop_sets, ge_iff_le, mem_preimage, mem_Ioi] at G_lim
-    obtain ⟨z', hz'⟩ := G_lim
-    specialize hz' z' le_rfl
+    have Gz'_ev_gt : ∀ᶠ z' in atTop, 1 - ε' < G z' := by
+      filter_upwards
+        [G.tendsto_atTop (show Ioi (1-ε') ∈ 𝓝 1 from Ioi_mem_nhds (by linarith))]
+        with z' hz' using hz'
+    obtain ⟨z', hz'⟩ := Gz'_ev_gt.exists
 
     -- Choose `z` s.t. `G(z) > 1 - ε'` and `G` is continuous at `z`
     obtain ⟨z, z_gt, z_cont⟩ :=
