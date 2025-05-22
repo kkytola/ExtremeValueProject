@@ -75,102 +75,66 @@ lemma apply_eq_one_of_tendsto_of_gt
     G' x = 1 := by
   have (ε : ℝ) (ε_pos : ε > 0) : G' x > 1 - ε := by
 
-    have dense_cont_pts (H : CumulativeDistributionFunction) :
-        Dense {x | ContinuousAt H x} := by
-      set S := {x : ℝ | ¬ContinuousAt H x} with hS
-      have : Countable S := countable_not_continuousAt H.mono'
-      have : Dense Sᶜ := dense_compl (𝕜 := ℝ) this
-      simp only [compl, hS, mem_setOf_eq, not_not] at this
-      assumption
+    have dense_cont_pts (H : CumulativeDistributionFunction) : Dense {x | ContinuousAt H x} := by
+      simpa [compl] using dense_compl (𝕜 := ℝ) (countable_not_continuousAt H.mono')
 
     -- Choose `x'` s.t. `β < x' < x` and `G'` is continuous at `x'`
-    have := (dense_cont_pts G').inter_open_nonempty (Ioo β x)
-      isOpen_Ioo (nonempty_Ioo.mpr x_gt)
-    obtain ⟨x', ⟨x'_gt, x'_lt⟩, x'_cont⟩ := this
+    obtain ⟨x', ⟨x'_gt, x'_lt⟩, x'_cont⟩ :=
+      (dense_cont_pts G').inter_open_nonempty (Ioo β x) isOpen_Ioo (nonempty_Ioo.mpr x_gt)
     simp only [mem_setOf_eq] at x'_cont
 
     -- Choose `z'` s.t. `G(z') > 1 - ε'` where `ε' := ε/2`
     set ε' := ε/2 with hε'
-    have G_lim := G.tendsto_atTop
-    simp only [tendsto_atTop_nhds] at G_lim
-    set I := {y | y > 1 - ε'} with hI
-    have : 1 ∈ I := by
-      simp only [mem_setOf_eq, sub_lt_self_iff, I, ε']
-      positivity
-    specialize G_lim I this isOpen_Ioi
-    obtain ⟨z', G_lim⟩ := G_lim
-    specialize G_lim z' (by linarith)
-    simp only [hI, mem_setOf_eq] at G_lim
+    have G_lim := G.tendsto_atTop (show Ioi (1-ε') ∈ 𝓝 1 from Ioi_mem_nhds (by linarith))
+    simp only [mem_map, mem_atTop_sets, ge_iff_le, mem_preimage, mem_Ioi] at G_lim
+    obtain ⟨z', hz'⟩ := G_lim
+    specialize hz' z' le_rfl
 
     -- Choose `z` s.t. `G(z) > 1 - ε'` and `G` is continuous at `z`
-    have := (dense_cont_pts G).inter_open_nonempty {z | z' < z}
-      isOpen_Ioi nonempty_Ioi
-    obtain ⟨z, z_gt, z_cont⟩ := this
-    simp only [hI, mem_setOf_eq] at z_gt
-    simp only [mem_setOf_eq] at z_cont
-    have Gz_gt : 1 - ε' < G z := calc
-      1 - ε' < G z' := G_lim
-      _ ≤ G z := G.mono' (by linarith)
+    obtain ⟨z, z_gt, z_cont⟩ :=
+      (dense_cont_pts G).inter_open_nonempty {z | z' < z} isOpen_Ioi nonempty_Ioi
+    simp only [mem_setOf_eq] at z_gt z_cont
+    have Gz_gt : 1 - ε' < G z := hz'.trans_le <| G.mono (by linarith)
 
     -- `Aₙ(z) → β`
-    have : Tendsto (λ n ↦ a n * z) atTop (𝓝 (0 * z)) := by
-      exact Tendsto.mul_const z a_lim
+    have : Tendsto (λ n ↦ a n * z) atTop (𝓝 (0 * z)) := a_lim.mul_const z
     simp only [zero_mul] at this
-    have A_lim : Tendsto (λ n ↦ a n * z + b n) atTop (𝓝 (0 + β)) := by
-      exact Tendsto.add this b_lim
+    have A_lim : Tendsto (λ n ↦ a n * z + b n) atTop (𝓝 (0 + β)) := this.add b_lim
     simp only [zero_add] at A_lim
 
     -- `Aₙ(z) < x'` for large `n`
-    simp only [tendsto_atTop_nhds] at A_lim
-    specialize A_lim {y | y < x'} x'_gt isOpen_Iio
-    simp only [mem_setOf_eq] at A_lim
+    have Anz_ev_lt : ∀ᶠ n in atTop, a n * z + b n < x' := by
+      filter_upwards [A_lim (Iio_mem_nhds x'_gt)] with n hn using hn
 
     -- `1 - ε' < Fₙ(z)` for large `n`
-    specialize F_lim z z_cont
-    simp only [tendsto_atTop_nhds] at F_lim
-    specialize F_lim {y | 1 - ε' < y} Gz_gt isOpen_Ioi
-    simp only [mem_setOf_eq] at F_lim
+    have Fnz_ev_gt : ∀ᶠ n in atTop, 1 - ε' < F n z := by
+      filter_upwards [F_lim z z_cont (Ioi_mem_nhds Gz_gt)] with n hn using hn
 
     -- Shorthand `Fₙ' = Aₙ.Fₙ`
     set F' : ℕ → CumulativeDistributionFunction :=
-      λ n ↦ (mkOfCoefs (a_pos n) (b n)) • (F n) with hF'
+      fun n ↦ (mkOfCoefs (a_pos n) (b n)) • (F n) with hF'
 
-    -- Assume the opposite to get
-    -- `Fₙ'(x') < 1 - ε'` for large `n`
-    by_contra
-    specialize F_lim' x' x'_cont
-    simp only [tendsto_atTop_nhds] at F_lim'
-    have := calc
-      G' x' ≤ G' x := by exact G'.mono (by linarith)
-      _ < 1 - ε' := by linarith
-    specialize F_lim' {y | y < 1 - ε'} this isOpen_Iio
-    simp only [mem_setOf_eq] at F_lim'
+    -- Assume the opposite to get `Fₙ'(x') < 1 - ε'` for large `n`
+    by_contra con
+    have F'nx'_ev_gt : ∀ᶠ n in atTop, F' n x' < 1 - ε' := by
+      filter_upwards
+        [F_lim' x' x'_cont (Iio_mem_nhds (show G' x' < 1 - ε' by linarith [G'.mono x'_lt.le]))]
+        with n hn using hn
 
-    -- Specialize convergences
-    obtain ⟨NA, A_lim⟩ := A_lim
-    obtain ⟨NF, F_lim⟩ := F_lim
-    obtain ⟨NF', F_lim'⟩ := F_lim'
-    set n := NA + NF + NF' with hn
-    specialize A_lim n (by linarith)
-    specialize F_lim n (by linarith)
-    specialize F_lim' n (by linarith)
+    obtain ⟨n, ⟨hn₁, hn₂⟩, hn₃⟩ := ((Fnz_ev_gt.and Anz_ev_lt).and F'nx'_ev_gt).exists
 
     -- Contradiction `1 - ε' < Fₙ(z) ≤ Fₙ'(x') < 1 - ε'`
     have := calc
       (F n) z = F' n (a n * z + b n) := by
-        simp only [hF', mulAction_apply_eq, apply_eq, inv_coefs_fst,
-          coefs_fst_mkOfCoefs, inv_coefs_snd, coefs_snd_mkOfCoefs, neg_mul]
-        ring_nf
-        have := a_pos n
-        field_simp
+        rw [← mulAction_apply_eq_self_apply (F n) (mkOfCoefs (a_pos n) (b n))]
+        rfl
       _ ≤ F' n x' := (F' n).mono' (by linarith)
     linarith
+
   have : G' x ≥ 1 := by
     by_contra
-    have := this ((1 - G' x) / 2) (by linarith)
-    linarith
-  have : G' x ≤ 1 := by exact apply_le_one G' x
-  linarith
+    linarith [this ((1 - G' x) / 2) (by linarith)]
+  linarith [apply_le_one G' x]
 
 open AffineIncrEquiv in
 /-- If we have c.d.f. convergence `Fₙ → G` and `Aₙ • Fₙ → G'`, where `Aₙ(x) = aₙ * x + bₙ`
