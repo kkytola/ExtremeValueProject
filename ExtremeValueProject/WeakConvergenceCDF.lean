@@ -81,7 +81,7 @@ lemma CumulativeDistributionFunction.integral_indicator_eq (F : CumulativeDistri
 
 /-- Lemma 4.6 (simple-integral-cdf-difference) in blueprint. -/
 lemma CumulativeDistributionFunction.integral_sum_indicator_eq (F : CumulativeDistributionFunction)
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {κ : Type*} {s : Finset κ} (as : κ → ℝ) (bs : κ → ℝ) (h : ∀ j, as j ≤ bs j) (α : κ → E) :
     ∫ x, ((∑ j ∈ s, indicator (Ioc (as j) (bs j)) (fun _ ↦ α j)) x) ∂ F.measure =
       ∑ j in s, (F (bs j) - F (as j)) • α j := by
