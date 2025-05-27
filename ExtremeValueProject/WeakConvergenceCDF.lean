@@ -83,8 +83,8 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
 
 /-- Preliminary to Lemma 4.6 (simple-integral-cdf-difference) in blueprint. -/
 lemma CumulativeDistributionFunction.integral_indicator_eq (F : CumulativeDistributionFunction)
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {κ : Type*} {s : Finset κ} {a b : ℝ} (a_le_b : a ≤ b) (α : E) :
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    {a b : ℝ} (a_le_b : a ≤ b) (α : E) :
     ∫ x, (indicator (Ioc a b) (fun _ ↦ α)) x ∂ F.measure =
       (F b - F a) • α := by
   have h_meas : MeasurableSet (Ioc a b) := measurableSet_Ioc
