@@ -110,9 +110,7 @@ lemma CumulativeDistributionFunction.integral_sum_indicator_eq (F : CumulativeDi
   rw [h_int_sum_change]
   congr
   ext j
-  apply CumulativeDistributionFunction.integral_indicator_eq
-  exact s
-  exact h j
+  exact F.integral_indicator_eq (h j) _
 
 open MeasureTheory Topology
 
