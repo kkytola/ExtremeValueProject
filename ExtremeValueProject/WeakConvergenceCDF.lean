@@ -41,8 +41,9 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
   let I : Set ℝ := Icc a b
   have hI_compact : IsCompact I := isCompact_Icc
   have hI_nonempty : I.Nonempty := nonempty_Icc.mpr (le_of_lt a_lt_b)
-  have hf_cont_I : ContinuousOn f I := by exact Continuous.continuousOn f_cont
-  have hf_unif_cont : UniformContinuousOn f I := hI_compact.uniformContinuousOn_of_continuous hf_cont_I
+  have hf_cont_I : ContinuousOn f I := f_cont.continuousOn
+  have hf_unif_cont : UniformContinuousOn f I :=
+    hI_compact.uniformContinuousOn_of_continuous hf_cont_I
   have h_δ : ∃ δ > 0, ∀ x ∈ I, ∀ y ∈ I, dist x y < δ → dist (f x) (f y) < ε := by
     rw [Metric.uniformContinuousOn_iff] at hf_unif_cont
     specialize hf_unif_cont ε
