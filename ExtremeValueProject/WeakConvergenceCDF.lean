@@ -46,9 +46,7 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
     hI_compact.uniformContinuousOn_of_continuous hf_cont_I
   have h_δ : ∃ δ > 0, ∀ x ∈ I, ∀ y ∈ I, dist x y < δ → dist (f x) (f y) < ε := by
     rw [Metric.uniformContinuousOn_iff] at hf_unif_cont
-    specialize hf_unif_cont ε
-    apply hf_unif_cont
-    exact ε_pos
+    exact hf_unif_cont ε ε_pos
   obtain ⟨δ, hδ_pos, hδ⟩ := h_δ
   obtain ⟨k, cs, h_cs_0, h_cs_last, h_cs_mono, h_cs_D, h_cs_diff⟩ :=
     forall_exists_subdivision_diff_lt_of_dense D_dense ha hb a_lt_b hδ_pos
