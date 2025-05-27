@@ -90,9 +90,8 @@ lemma CumulativeDistributionFunction.integral_indicator_eq (F : CumulativeDistri
   have h_meas : MeasurableSet (Ioc a b) := measurableSet_Ioc
   rw [MeasureTheory.integral_indicator h_meas, MeasureTheory.integral_const]
   have h_cdf : F.measure (Ioc a b) = ENNReal.ofReal (F b - F a) := StieltjesFunction.measure_Ioc F.toStieltjesFunction a b
-  refine Mathlib.Tactic.LinearCombination.smul_eq_const ?_ α
-  rw [MeasureTheory.Measure.real, MeasureTheory.Measure.restrict_apply_univ]
-  rw [h_cdf, ENNReal.toReal_ofReal (sub_nonneg.mpr (F.mono a_le_b))]
+  congr
+  simp [h_cdf, ENNReal.toReal_ofReal (sub_nonneg.mpr (F.mono a_le_b))]
 
 /-- Lemma 4.6 (simple-integral-cdf-difference) in blueprint. -/
 lemma CumulativeDistributionFunction.integral_sum_indicator_eq (F : CumulativeDistributionFunction)
