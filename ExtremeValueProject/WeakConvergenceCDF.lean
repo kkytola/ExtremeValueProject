@@ -89,7 +89,8 @@ lemma CumulativeDistributionFunction.integral_indicator_eq (F : CumulativeDistri
       (F b - F a) • α := by
   have h_meas : MeasurableSet (Ioc a b) := measurableSet_Ioc
   rw [MeasureTheory.integral_indicator h_meas, MeasureTheory.integral_const]
-  have h_cdf : F.measure (Ioc a b) = ENNReal.ofReal (F b - F a) := StieltjesFunction.measure_Ioc F.toStieltjesFunction a b
+  have h_cdf : F.measure (Ioc a b) = ENNReal.ofReal (F b - F a) :=
+    F.toStieltjesFunction.measure_Ioc a b
   congr
   simp [h_cdf, ENNReal.toReal_ofReal (sub_nonneg.mpr (F.mono a_le_b))]
 
