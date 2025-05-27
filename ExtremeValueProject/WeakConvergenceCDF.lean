@@ -55,26 +55,12 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
   have h_cs_bound : ∀ i : Fin k, ∀ x ∈ Icc (cs i) (cs i.succ), ∀ y ∈ Icc (cs i) (cs i.succ), dist (f x) (f y) < ε := by
     intro i x hx y hy
     have hx_I : x ∈ I := by
-      unfold I
-      have h_lower : a ≤ cs i := by
-        rw [← h_cs_0]
-        apply h_cs_mono
-        apply Fin.zero_le
-      have h_upper : cs i.succ ≤ b := by
-        rw [← h_cs_last]
-        apply h_cs_mono
-        exact Fin.le_last i.succ
+      have h_lower : a ≤ cs i := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
+      have h_upper : cs i.succ ≤ b := by simpa [← h_cs_last] using h_cs_mono (Fin.le_last i.succ)
       exact Icc_subset_Icc h_lower h_upper hx
     have hy_I : y ∈ I := by
-      unfold I
-      have h_lower : a ≤ cs i := by
-        rw [← h_cs_0]
-        apply h_cs_mono
-        apply Fin.zero_le
-      have h_upper : cs i.succ ≤ b := by
-        rw [← h_cs_last]
-        apply h_cs_mono
-        exact Fin.le_last i.succ
+      have h_lower : a ≤ cs i := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
+      have h_upper : cs i.succ ≤ b := by simpa [← h_cs_last] using h_cs_mono (Fin.le_last i.succ)
       exact Icc_subset_Icc h_lower h_upper hy
     have h_dist_xy : dist x y < δ := by
       have h_bound : dist x y ≤ cs i.succ - cs i := by exact Real.dist_le_of_mem_Icc hx hy
