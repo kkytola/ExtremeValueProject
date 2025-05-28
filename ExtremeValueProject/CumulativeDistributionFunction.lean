@@ -167,7 +167,22 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
     ContinuousAt F x ↔ F.measure {x} = 0 := by
   rw [StieltjesFunction.measure_singleton]
   rw [Monotone.continuousAt_iff_leftLim_eq_rightLim F.mono']
-  sorry -- **Issue #11**
+
+  -- Rewrite function value in place of right limit
+  rw [StieltjesFunction.rightLim_eq]
+  constructor
+  · intro h
+    simp [h]
+  · intro h
+    -- We need to show: leftLim F x = F x
+    -- We know: ofReal (F x - leftLim F x) = 0
+    have h_nonneg : 0 ≤ F x - Function.leftLim F x := by
+      apply sub_nonneg.mpr
+      simpa [← StieltjesFunction.rightLim_eq] using F.mono'.leftLim_le_rightLim (by linarith)
+
+    have h_eq_zero : F x - Function.leftLim F x = 0 := by
+      linarith [ENNReal.ofReal_eq_zero.mp h]
+    linarith
 
 /-- Lemma 4.7 (cdf-convergence-from-convergence-in-distribution) in blueprint:
 Convergence in distribution of a sequence of Borel probability measures on `ℝ` implies that the
