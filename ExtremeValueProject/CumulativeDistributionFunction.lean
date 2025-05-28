@@ -172,8 +172,7 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
   rw [StieltjesFunction.rightLim_eq]
   constructor
   · intro h
-    rw [h]
-    simp
+    simp [h]
   · intro h
     -- We need to show: leftLim F x = F x
     -- We know: ofReal (F x - leftLim F x) = 0
