@@ -183,8 +183,7 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
     have h_nonneg : 0 ≤ F x - Function.leftLim F x := sub_nonneg.mpr h_le
 
     have h_eq_zero : F x - Function.leftLim F x = 0 := by
-      rw [ENNReal.ofReal_eq_zero] at h
-      linarith
+      linarith [ENNReal.ofReal_eq_zero.mp h]
     linarith
 
 /-- Lemma 4.7 (cdf-convergence-from-convergence-in-distribution) in blueprint:
