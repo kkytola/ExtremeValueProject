@@ -176,11 +176,9 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
   · intro h
     -- We need to show: leftLim F x = F x
     -- We know: ofReal (F x - leftLim F x) = 0
-    have h_le : Function.leftLim F x ≤ F x := by
-      rw [← StieltjesFunction.rightLim_eq]
-      exact Monotone.leftLim_le_rightLim F.mono' (by linarith)
-
-    have h_nonneg : 0 ≤ F x - Function.leftLim F x := sub_nonneg.mpr h_le
+    have h_nonneg : 0 ≤ F x - Function.leftLim F x := by
+      apply sub_nonneg.mpr
+      simpa [← StieltjesFunction.rightLim_eq] using F.mono'.leftLim_le_rightLim (by linarith)
 
     have h_eq_zero : F x - Function.leftLim F x = 0 := by
       linarith [ENNReal.ofReal_eq_zero.mp h]
