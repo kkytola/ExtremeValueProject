@@ -14,25 +14,13 @@ open scoped Topology
 section generalities
 
 -- TODO: Should something like this be in Mathlib?
-lemma NormedSpace.tendsto_zero_iff_isLittleO_one {ι : Type*} {L : Filter ι}
-    {E : Type*} [SeminormedAddCommGroup E] [NormedSpace ℝ E] {f : ι → E} :
-    L.Tendsto f (𝓝 0) ↔ (fun i ↦ f i) =o[L] (fun _ ↦ (1 : ℝ)) := by
-  simp only [Metric.tendsto_nhds, gt_iff_lt, dist_zero_right, isLittleO_iff, norm_one, mul_one]
-  constructor
-  · intro h_tends ε ε_pos
-    filter_upwards [h_tends ε ε_pos] with i hi using hi.le
-  · intro h_littleO ε ε_pos
-    filter_upwards [h_littleO (c := ε / 2) (by linarith)] with i hi
-    exact lt_of_le_of_lt hi (by linarith)
-
--- TODO: Should something like this be in Mathlib?
 lemma NormedSpace.tendsto_of_tendsto_of_sub_isLittleO_one {ι : Type*} {L : Filter ι}
     {E : Type*} {v : E} [SeminormedAddCommGroup E] [NormedSpace ℝ E] {f g : ι → E}
     (hf : L.Tendsto f (𝓝 v)) (hfg : (fun i ↦ f i - g i) =o[L] (fun _ ↦ (1 : ℝ))) :
     L.Tendsto g (𝓝 v) := by
   apply tendsto_sub_nhds_zero_iff.mp
   have hfv : L.Tendsto (fun i ↦ f i - v) (𝓝 0) := tendsto_sub_nhds_zero_iff.mpr hf
-  rw [tendsto_zero_iff_isLittleO_one] at hfv
+  rw [← isLittleO_one_iff (F := ℝ)] at hfv
   simpa only [sub_sub_sub_cancel_left, isLittleO_one_iff] using hfv.sub hfg
 
 -- TODO: Should something like this be in Mathlib?
@@ -41,7 +29,7 @@ lemma NormedSpace.tendsto_of_tendsto_of_sub_isLittleO_one {ι : Type*} {L : Filt
 lemma NormedSpace.tendsto_iff_sub_const_isLittleO_one {ι : Type*} {L : Filter ι}
     {E : Type*} {v : E} [SeminormedAddCommGroup E] [NormedSpace ℝ E] {f : ι → E} :
     L.Tendsto f (𝓝 v) ↔ (fun i ↦ f i - v) =o[L] (fun _ ↦ (1 : ℝ)) := by
-  simpa [← tendsto_zero_iff_isLittleO_one] using tendsto_sub_nhds_zero_iff.symm
+  simp only [isLittleO_one_iff, tendsto_sub_nhds_zero_iff]
 
 end generalities
 
@@ -229,15 +217,8 @@ lemma tendsto_smul_apply_smul_deriv_of_tendsto_atTop_of_tendsto_mul
     have key' := (isBigO_refl m L).smul_isLittleO hDfa
     simp only [smul_sub, smul_eq_mul] at key'
     simpa [mul_smul] using key'.trans_isBigO ma_isBigO
-  suffices key_diff : (fun i ↦ (m i) • f (a i) - (m i * a i) • D) =o[L] (fun i ↦ (1 : ℝ)) by
-    apply NormedSpace.tendsto_of_tendsto_of_sub_isLittleO_one (Tendsto.smul_const hma D)
-    exact isLittleO_comm.mp key
-  rw [hasDerivAt_iff_hasFDerivAt, hasFDerivAt_iff_isLittleO_nhds_zero] at hDf
-  simp only [zero_add, hf, sub_zero, ContinuousLinearMap.smulRight_apply,
-             ContinuousLinearMap.one_apply] at hDf
-  have newkey := (isBigO_refl m L).smul_isLittleO hDfa
-  simp only [smul_sub, smul_eq_mul] at newkey
-  simpa [mul_smul] using newkey.trans_isBigO ma_isBigO
+  apply NormedSpace.tendsto_of_tendsto_of_sub_isLittleO_one (Tendsto.smul_const hma D)
+  exact isLittleO_comm.mp key
 
 lemma tendsto_smul_apply_smul_deriv_of_tendsto_atTop_of_tendsto_smul_apply_smul_deriv
     {ι : Type*} {L : Filter ι} [NeBot L] {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]

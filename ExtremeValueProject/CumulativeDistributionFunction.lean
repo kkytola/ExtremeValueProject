@@ -167,7 +167,22 @@ lemma continuousAt_iff (F : CumulativeDistributionFunction) (x : ℝ) :
     ContinuousAt F x ↔ F.measure {x} = 0 := by
   rw [StieltjesFunction.measure_singleton]
   rw [Monotone.continuousAt_iff_leftLim_eq_rightLim F.mono']
-  sorry -- **Issue #11**
+
+  -- Rewrite function value in place of right limit
+  rw [StieltjesFunction.rightLim_eq]
+  constructor
+  · intro h
+    simp [h]
+  · intro h
+    -- We need to show: leftLim F x = F x
+    -- We know: ofReal (F x - leftLim F x) = 0
+    have h_nonneg : 0 ≤ F x - Function.leftLim F x := by
+      apply sub_nonneg.mpr
+      simpa [← StieltjesFunction.rightLim_eq] using F.mono'.leftLim_le_rightLim (by linarith)
+
+    have h_eq_zero : F x - Function.leftLim F x = 0 := by
+      linarith [ENNReal.ofReal_eq_zero.mp h]
+    linarith
 
 /-- Lemma 4.7 (cdf-convergence-from-convergence-in-distribution) in blueprint:
 Convergence in distribution of a sequence of Borel probability measures on `ℝ` implies that the
@@ -191,7 +206,21 @@ lemma eq_of_forall_apply_eq_const_mul (F G : CumulativeDistributionFunction)
 lemma eq_of_forall_dense_eq {S : Set ℝ} (S_dense : Dense S) (F G : CumulativeDistributionFunction)
     (h : ∀ x ∈ S, F x = G x) :
     F = G := by
-  sorry -- **Issue #52**
+  ext x
+  have obs : 𝓝[S ∩ (Ici x)] x ≤ 𝓝[≥] x := by
+    apply nhdsWithin_mono
+    exact inf_le_right
+  have F_tendsto_Fx := (F.right_continuous x).mono_left obs
+  have G_tendsto_Fx :=
+    F_tendsto_Fx.congr' (eventuallyEq_nhdsWithin_of_eqOn (EqOn.mono inter_subset_left h))
+  have G_tendsto_Gx := (G.right_continuous x).mono_left obs
+  refine tendsto_nhds_unique' ?_ G_tendsto_Fx G_tendsto_Gx
+  rw [nhdsWithin_neBot]
+  intro s hs
+  rw [inter_comm, inter_assoc, inter_nonempty]
+  obtain ⟨u, hu, Ico_subset_s⟩ := exists_Ico_subset_of_mem_nhds hs (exists_gt x)
+  obtain ⟨x', x'_mem_S, x'_mem_Ioo⟩ := S_dense.exists_between hu
+  use x', x'_mem_S, le_of_lt x'_mem_Ioo.1, Ico_subset_s (mem_Ico_of_Ioo x'_mem_Ioo)
 
 end CumulativeDistributionFunction
 
