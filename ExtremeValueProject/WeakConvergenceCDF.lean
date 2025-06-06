@@ -25,7 +25,216 @@ lemma forall_exists_subdivision_diff_lt_of_dense {D : Set ℝ} (D_dense : Dense 
     ∃ (k : ℕ) (cs : Fin (k + 1) → ℝ),
       (cs 0 = a) ∧ (cs (Fin.last _) = b) ∧ (Monotone cs) ∧ (∀ k, cs k ∈ D) ∧
       (∀ (j : Fin k), cs j.succ - cs j < δ) := by
-  sorry -- **Issue #22**
+  let k := Nat.ceil ((b - a) / δ) + 1
+  have k_pos : 0 < k := by
+    exact Nat.zero_lt_succ ⌈(b - a) / δ⌉₊
+  let ε := min ((δ - (b - a) / k) / 2) (((b - a) / k) / 2)
+  have ε_pos : 0 < ε := by
+    apply lt_min
+    · apply half_pos
+      refine sub_pos.mpr ?_
+      refine (div_lt_comm₀ δ_pos ?_).mp ?_
+      · exact Nat.cast_pos'.mpr k_pos
+      · have h: ⌈(b - a) / δ⌉₊ < ⌈(b - a) / δ⌉₊ + 1 := by
+          exact lt_add_one ⌈(b - a) / δ⌉₊
+        exact Nat.lt_of_ceil_lt h
+    · apply half_pos
+      refine div_pos ?_ ?_
+      · exact sub_pos.mpr a_lt_b
+      · exact Nat.cast_pos'.mpr k_pos
+  let cs₀ : Fin (k + 1) → ℝ := fun i ↦ a + (b - a) * i / k
+  have cs₀_0 : cs₀ 0 = a := by simp [cs₀]
+  have cs₀_last : cs₀ (Fin.last k) = b := by
+    simp [cs₀, Fin.last]
+  have cs₀_mono : Monotone cs₀ := by
+    intro i j hij
+    apply add_le_add_left
+    refine (div_le_div_iff_of_pos_right ?_).mpr ?_
+    · exact Nat.cast_pos'.mpr k_pos
+    · refine mul_le_mul_of_nonneg ?_ ?_ ?_ ?_
+      · exact Preorder.le_refl (b - a)
+      · exact Nat.cast_le.mpr hij
+      · refine sub_nonneg_of_le ?_
+        exact le_of_lt a_lt_b
+      · exact Nat.cast_nonneg' ↑j
+  choose! cs' hcs_in_D hcs_Ioo using fun i =>
+    Dense.exists_between D_dense (lt_add_of_pos_right (cs₀ i - ε / 2) ε_pos)
+  let cs : Fin (k + 1) → ℝ := fun i =>
+    if i = 0 then a else if i = Fin.last k then b else cs' i
+  have hcs_bounds : ∀ i, cs₀ i - ε / 2 < cs i ∧ cs i < cs₀ i + ε / 2 := by
+    intro i
+    have h := hcs_Ioo i
+    simp [Ioo, mem_setOf] at h
+    cases' h with h1 h2
+    constructor
+    · by_cases h0 : i = 0
+      · simp [h0, cs, cs₀_0]
+        exact ε_pos
+      · by_cases hlast : i = Fin.last k
+        · simp [hlast, cs, cs₀_last]
+          by_cases hk : k = 0
+          · have k_pos_1 := k_pos
+            rw [hk] at k_pos_1
+            exact (StrictAnti.lt_iff_lt fun ⦃a b⦄ a => k_pos_1).mp k_pos_1
+          · rw [if_neg hk]
+            linarith
+        · simp [cs, h0, hlast]
+          exact h1
+    · by_cases h0 : i = 0
+      · simp [h0, cs, cs₀_0]
+        exact ε_pos
+      · by_cases hlast : i = Fin.last k
+        · simp [hlast, cs, cs₀_last]
+          by_cases hk : k = 0
+          · have k_pos_1 := k_pos
+            rw [hk] at k_pos_1
+            exact (StrictAnti.lt_iff_lt fun ⦃a b⦄ a => k_pos_1).mp k_pos_1
+          · rw [if_neg hk]
+            linarith
+        · simp [cs, h0, hlast]
+          have : cs₀ i - ε / 2 + ε = cs₀ i + ε / 2 := by
+            ring
+          rw [this] at h2
+          exact h2
+  have fin_last_ne_zero {k : ℕ} (hk : 0 < k) : (Fin.last k : Fin (k + 1)) ≠ 0 := by
+    intro h
+    have val_eq : (Fin.last k).val = (0 : ℕ) := congr_arg Fin.val h
+    rw [Fin.last] at val_eq
+    simp at val_eq
+    rw [val_eq] at hk
+    contradiction
+  have cs_last_b : cs (Fin.last k) = b := by
+    simp [cs, fin_last_ne_zero k_pos]
+  use k, cs
+  constructor
+  · -- ⊢ cs 0 = a
+    exact rfl
+  · constructor
+    · -- ⊢ cs (Fin.last k) = b
+      exact cs_last_b
+    · constructor
+      · -- ⊢ Monotone cs
+        intro i j hij
+        by_cases hije : i = j
+        · rw [hije]
+        · have h1 : cs i < cs₀ i + ε  / 2 := (hcs_bounds i).2
+          have h2 : cs j > cs₀ j - ε / 2 := (hcs_bounds j).1
+          have h3 : cs₀ j - cs₀ i - ε > 0 := by
+            simp only [cs₀]
+            simp
+            field_simp
+            unfold ε
+            apply lt_of_le_of_lt (min_le_right _ _)
+            have : ((b - a) * ↑↑j - (b - a) * ↑↑i) / ↑k = ((b - a) * (↑↑j - ↑↑i)) / ↑k := by
+              ring
+            rw [this]
+            have htest1 : (b - a) / ↑k / 2 < (b - a) / ↑k := by 
+              refine _root_.half_lt_self ?_
+              refine div_pos ?_ ?_
+              · exact sub_pos.mpr a_lt_b
+              · exact Nat.cast_pos'.mpr k_pos
+            have htest2 : (b - a) / ↑k ≤ (b - a) * (↑↑j - ↑↑i) / ↑k := by
+              refine (div_le_div_iff_of_pos_right ?_).mpr ?_
+              · exact Nat.cast_pos'.mpr k_pos
+              · refine (div_le_iff₀' ?_).mp ?_
+                · exact sub_pos.mpr a_lt_b
+                · have : (b - a) / (b - a) = 1 := by
+                    refine div_self ?_
+                    refine Ne.symm (ne_of_lt ?_)
+                    exact sub_pos.mpr a_lt_b
+                  rw [this]
+                  refine le_sub_iff_add_le'.mpr ?_
+                  have hij' : i < j := lt_of_le_of_ne hij hije
+                  have hmm1 : i < j → i + 1 ≤ j := by
+                    exact fun a => Fin.add_one_le_of_lt hij'
+                  apply hmm1 at hij'
+                  have hmm2 : i + 1 ≤ j → ↑i + 1 ≤ ↑j := by
+                    refine fun a => ?_
+                    · exact_mod_cast hij'
+                  apply hmm2 at hij'
+                  have hmm2 : (i : ℝ) + 1 ≤ (j : ℝ) := by 
+                    -- this is clearly true, but my 'lean online' doesn't work well, so I leave 'sorry'
+                    sorry
+                  exact hmm2
+            have htest3 : (b - a) / ↑k / 2 < (b - a) * (↑↑j - ↑↑i) / ↑k := by
+              exact gt_of_ge_of_gt htest2 htest1
+            apply htest3
+          have h4 : cs j - cs i > cs₀ j - ε / 2 - (cs₀ i + ε / 2) := by
+            exact sub_lt_sub h2 h1
+          have h5 : cs₀ j - ε / 2 - (cs₀ i + ε / 2) = cs₀ j - cs₀ i - ε := by
+            ring
+          have h6 : cs j - cs i > cs₀ j - cs₀ i - ε := by
+            exact lt_of_eq_of_lt (id (Eq.symm h5)) h4
+          have h7 : cs j - cs i > 0 := by
+            exact gt_trans h6 h3
+          have h8 : cs i < cs j := by
+            exact lt_add_neg_iff_lt.mp h7
+          exact le_of_lt h8
+      · constructor
+        · -- ⊢ ∀ (k : Fin (k + 1)), cs k ∈ D
+          intro i
+          by_cases hi0 : i = 0
+          · rw [hi0]
+            exact ha
+          · by_cases hilast : i = Fin.last k
+            · rw [hilast]
+              by_cases hk : k = 0
+              · have k_pos_1 := k_pos
+                rw [hk] at k_pos_1
+                contradiction
+              · rw [cs_last_b]
+                exact hb
+            · simp [cs, hi0, hilast]
+              exact hcs_in_D i
+        · -- ⊢ ∀ (j : Fin k), cs j.succ - cs ↑↑j < δ
+          intro j
+          have h_bound_succ := hcs_bounds j.succ
+          have h_bound_j := hcs_bounds j
+          rcases h_bound_succ with ⟨h_succ_lt, h_succ_gt⟩
+          rcases h_bound_j with ⟨h_j_lt, h_j_gt⟩
+          have h1 : cs j.succ < cs₀ j.succ + ε / 2 := by
+            exact h_succ_gt
+          have h2 : cs j > cs₀ j - ε / 2 := by
+            exact h_j_lt
+          have h21 : - cs j < - cs₀ j + ε / 2:= by
+            apply neg_lt_neg at h2
+            rw [neg_sub] at h2
+            have : ε / 2 - cs₀ ↑↑j = -cs₀ ↑↑j + ε / 2 := by
+              ring
+            rw [← this]
+            exact h2
+          have h3 : cs j.succ + (- cs j) < (cs₀ j.succ + ε / 2) + (- cs₀ j + ε / 2) := by
+            have htest {a b c d : ℝ} (hab : a < b) (hcd : c < d) : a + c < b + d := by
+              exact add_lt_add hab hcd
+            exact htest h1 h21
+          have h33 : cs j.succ - cs j < cs₀ j.succ + ε - cs₀ j := by
+            rw [←sub_eq_add_neg] at h3
+            have h333 : (cs₀ j.succ + ε / 2) + (- cs₀ j + ε / 2) = cs₀ j.succ + ε - cs₀ j := by
+              linarith
+            rw [← h333] at ⊢
+            exact h3
+          have h4t : cs₀ j.succ + ε - cs₀ j = cs₀ j.succ - cs₀ j  + ε := by
+            linarith
+          have h4 : cs₀ j.succ - cs₀ j  + ε  < δ := by
+            refine lt_tsub_iff_left.mp ?_
+            have h41 : cs₀ j.succ - cs₀ j = (b - a) / k := by
+              simp only [cs₀]
+              simp
+              ring
+            rw [h41]
+            unfold ε
+            apply lt_of_le_of_lt (min_le_left _ _)
+            apply @_root_.half_lt_self
+            refine sub_pos.mpr ?_
+            refine (div_lt_comm₀ ?_ δ_pos).mpr ?_
+            · exact Nat.cast_pos'.mpr k_pos
+            · refine Nat.lt_of_ceil_lt ?_
+              exact lt_add_one ⌈(b - a) / δ⌉₊
+          have h5 : cs j.succ - cs j  < cs₀ j.succ - cs₀ j  + ε := by
+            exact lt_of_lt_of_eq h33 h4t
+          have h55 : cs j.succ - cs j  < δ := by
+            exact gt_trans h4 h5
+          exact h55
 
 /-- Lemma 4.5 (continuous-function-approximation-subdivision) in blueprint:
 An interval `[a,b]` can be subdivided with points from a dense set so that for a given
