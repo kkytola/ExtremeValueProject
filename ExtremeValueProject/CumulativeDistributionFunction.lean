@@ -129,7 +129,7 @@ lemma _root_.MeasureTheory.ProbabilityMeasure.measure_cdf (μ : ProbabilityMeasu
     (μ.cdf : StieltjesFunction).measure = μ := by
   refine Measure.ext_of_Iic (μ.cdf : StieltjesFunction).measure μ (fun x ↦ ?_)
   simp only [StieltjesFunction.measure_Iic _ (ProbabilityMeasure.cdf μ).tendsto_atBot,
-    μ.cdf_toStieltjesFunction_apply_eq x, sub_zero, ofReal_coe_nnreal, ne_eq,
+    μ.cdf_toStieltjesFunction_apply_eq x, sub_zero, ofReal_coe_nnreal,
     ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
 
 /-- A bijective correspondence between `CumulativeDistributionFunction`s and Borel

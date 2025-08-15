@@ -45,7 +45,7 @@ lemma Real.rightOrdContinuous_indicator_Ici_rpow {t : ℝ} (t_nn : 0 < t) :
       · have nhd : Iio 0 ∈ 𝓝[≥] p :=
           mem_nhdsGE_iff_exists_Ico_subset.mpr ⟨0, lt_of_not_ge p_nn, Ico_subset_Iio_self⟩
         filter_upwards [nhd] with y hy
-        simp [show ¬ y ∈ Ici 0 from not_mem_Ici.mpr hy]
+        simp [show ¬ y ∈ Ici 0 from notMem_Ici.mpr hy]
       · simp [p_nn]
 
 noncomputable def CumulativeDistributionFunction.pow
@@ -122,7 +122,7 @@ theorem gumbel_type_of_selfSimilar_index_zero
   ext x
   rw [gumbel_type_of_selfSimilar_index_zero' G_nondeg β_pos hG]
   simp only [CumulativeDistributionFunction.mulAction_apply_eq, inv_inv, apply_eq,
-             coefs_fst_mkOfCoefs, one_mul, coefs_snd_mkOfCoefs]
+             coefs_fst_mkOfCoefs, coefs_snd_mkOfCoefs]
   rw [standardGumbelCDF_apply_eq]
   simp only [neg_mul, log_neg_eq_log, neg_add_rev, neg_neg, exp_eq_exp, neg_inj]
   ring

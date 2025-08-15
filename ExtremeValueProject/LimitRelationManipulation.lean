@@ -80,8 +80,7 @@ lemma tendsto_zero_of_tendsto_atTop_of_tendsto_smul {ι : Type*} {L : Filter ι}
   have vanishing := tendsto_norm_apply_zero_of_tendsto_atTop_of_tendsto_smul f m_to_infty ha
   have vanishing' : Tendsto (fun i => f (a i)) L (𝓝 0) :=
     tendsto_zero_iff_norm_tendsto_zero.mpr vanishing
-  simp only [mem_ball, dist_zero_right, Real.norm_eq_abs, Metric.tendsto_nhds, norm_norm]
-    at vanishing' hs ⊢
+  simp only [mem_ball, dist_zero_right, Real.norm_eq_abs, Metric.tendsto_nhds] at vanishing' hs ⊢
   intro δ δ_pos
   obtain ⟨ε, ε_pos, hε⟩ := hs δ δ_pos
   filter_upwards [a_in_s, vanishing' ε ε_pos] with i his hif using hε _ his hif
@@ -147,7 +146,7 @@ lemma mul_isBigO_one_of_tendsto_atTop_of_tendsto_smul_apply {ι : Type*} {L : Fi
   use C * (2 * ‖D‖⁻¹)
   filter_upwards [aux, hC] with i hiz hiw
   simp only [norm_smul, Real.norm_eq_abs] at hiw
-  have hiz' := (@le_div_iff₀ ℝ _ _ _ |a i| ‖f (a i)‖ (‖D‖ / 2) _ (by linarith)).mpr hiz
+  have hiz' := (@le_div_iff₀ ℝ _ _ _ |a i| ‖f (a i)‖ (‖D‖ / 2) (by linarith)).mpr hiz
   simp only [div_eq_mul_inv, mul_inv_rev, inv_inv] at hiz'
   apply (mul_le_mul (le_refl |m i|) hiz' (abs_nonneg (a i)) (abs_nonneg (m i))).trans
   rw [← mul_assoc]
@@ -193,7 +192,7 @@ lemma tendsto_smul_self_iff_tendsto_of_ne_zero {ι : Type*} {L : Filter ι} [NeB
   · intro r_lim
     have key : ContinuousAt (fun (t : ℝ) ↦ t • v) c :=
       (continuous_smul.comp (Continuous.prodMk_left v)).continuousAt
-    simp only [ContinuousAt, one_smul] at key
+    simp only [ContinuousAt] at key
     exact key.comp r_lim
 
 lemma tendsto_smul_apply_smul_deriv_of_tendsto_atTop_of_tendsto_mul

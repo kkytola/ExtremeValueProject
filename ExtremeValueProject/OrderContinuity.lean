@@ -134,19 +134,6 @@ variable {X : Type*} [ConditionallyCompleteLinearOrder X] [TopologicalSpace X] [
 variable {Y : Type*} [ConditionallyCompleteLinearOrder Y] [TopologicalSpace Y] [OrderTopology Y]
 variable [DenselyOrdered X] {f : X → Y} {x : X}
 
-/-- An order-theoretically left-continuous function is topologically left-continuous, assuming
-the function is between conditionally complete linear orders with order topologies, and the domain
-is densely ordered. -/
-lemma LeftOrdContinuous.continuousWithinAt_Iic (hf : LeftOrdContinuous f) :
-    ContinuousWithinAt f (Iic x) x :=
-  Monotone.continuousWithinAt_Iic_of_isLUB_image_Iio hf.mono (hf isLUB_Iio)
-
-/-- An order-theoretically right-continuous function is topologically right-continuous, assuming
-the function is between conditionally complete linear orders with order topologies, and the domain
-is densely ordered. -/
-lemma RightOrdContinuous.continuousWithinAt_Ici (hf : RightOrdContinuous f) :
-    ContinuousWithinAt f (Ici x) x := hf.orderDual.continuousWithinAt_Iic
-
 /-- A topologically left-continuous function is order-theoretically left-continuous, assuming
 the function is between conditionally complete linear orders with order topologies, and the domain
 is densely ordered and has no minimum. -/

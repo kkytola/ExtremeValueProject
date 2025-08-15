@@ -318,7 +318,7 @@ lemma oneDivNegLog_apply_ofReal_of_pos_of_lt_one (F : CumulativeDistributionFunc
     (Fx_pos : 0 < F x) (Fx_lt_one : F x < 1) :
     F.oneDivNegLog x = ENNReal.ofReal (1 / (Real.log (F x)⁻¹)) := by
   rw [oneDivNegLog_apply_ofReal_of_pos _ Fx_pos]
-  simp only [oneDivNegLog_apply_ofReal_of_pos _ Fx_pos, one_div]
+  simp only [one_div]
   have Fx_inv_gt_one : 1 < (F x)⁻¹ := (one_lt_inv₀ Fx_pos).mpr Fx_lt_one
   rw [ENNReal.ofReal_inv_of_pos (Real.log_pos Fx_inv_gt_one)]
 
@@ -394,7 +394,7 @@ lemma oneDivSub_limit_iff {F G : CumulativeDistributionFunction}
       filter_upwards [Ioi_mem_atTop 0, aux_pos'] with n n_pos aux_pos
       simp only [CumulativeDistributionFunction.oneDivOneSub_apply_ofReal,
                  one_div, mul_inv_rev, Function.comp_apply]
-      rw [mul_comm _ (_)⁻¹, ENNReal.ofReal_mul (by simp [n_pos]), ENNReal.ofReal_inv_of_pos aux_pos]
+      rw [mul_comm _ (_)⁻¹, ENNReal.ofReal_mul (by simp), ENNReal.ofReal_inv_of_pos aux_pos]
       rw [ENNReal.ofReal_sub _ ((As n • F).apply_nonneg x), ofReal_one]
       congr
       simp [ofReal_inv_of_pos (Nat.cast_pos'.mpr n_pos)]

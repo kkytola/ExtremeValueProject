@@ -303,7 +303,8 @@ lemma lcInv_comp_symm (φ : R ≃ T) (hφ : RightOrdContinuous φ) :
   simp only [lcInv, Function.comp_apply, RightOrdContinuous.map_sInf' hφ _]
   congr
   ext x
-  simp
+  simp only [mem_setOf_eq]
+  grind
 
 lemma lcInv_comp (φ : T ≃ R) (hφ : RightOrdContinuous φ.symm) :
     lcInv (F ∘ φ) = φ.symm ∘ (lcInv F) :=

@@ -24,7 +24,7 @@ lemma forall_exists_subdivision_diff_lt_of_dense {D : Set ℝ} (D_dense : Dense 
     {a b : ℝ} (ha : a ∈ D) (hb : b ∈ D) (a_lt_b : a < b) {δ : ℝ} (δ_pos : 0 < δ) :
     ∃ (k : ℕ) (cs : Fin (k + 1) → ℝ),
       (cs 0 = a) ∧ (cs (Fin.last _) = b) ∧ (Monotone cs) ∧ (∀ k, cs k ∈ D) ∧
-      (∀ (j : Fin k), cs j.succ - cs j < δ) := by
+      (∀ (j : Fin k), cs j.succ - cs (Fin.castAdd _ j) < δ) := by
   sorry -- **Issue #22**
 
 /-- Lemma 4.5 (continuous-function-approximation-subdivision) in blueprint:
@@ -36,8 +36,8 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
     {ε : ℝ} (ε_pos : 0 < ε) :
     ∃ (k : ℕ) (cs : Fin (k + 1) → ℝ),
       (cs 0 = a) ∧ (cs (Fin.last _) = b) ∧ (Monotone cs) ∧ (∀ k, cs k ∈ D) ∧
-      (∀ (j : Fin k), ∀ x ∈ Icc (cs j) (cs j.succ), ∀ y ∈ Icc (cs j) (cs j.succ),
-        dist (f x) (f y) < ε) := by
+      (∀ (j : Fin k), ∀ x ∈ Icc (cs (Fin.castAdd _ j)) (cs j.succ),
+        ∀ y ∈ Icc (cs (Fin.castAdd _ j)) (cs j.succ), dist (f x) (f y) < ε) := by
   let I : Set ℝ := Icc a b
   have hI_compact : IsCompact I := isCompact_Icc
   have hI_nonempty : I.Nonempty := nonempty_Icc.mpr (le_of_lt a_lt_b)
@@ -50,47 +50,47 @@ lemma forall_exists_subdivision_dist_apply_lt_of_dense_of_continuous {D : Set �
   obtain ⟨δ, hδ_pos, hδ⟩ := h_δ
   obtain ⟨k, cs, h_cs_0, h_cs_last, h_cs_mono, h_cs_D, h_cs_diff⟩ :=
     forall_exists_subdivision_diff_lt_of_dense D_dense ha hb a_lt_b hδ_pos
-  have h_cs_bound : ∀ i : Fin k, ∀ x ∈ Icc (cs i) (cs i.succ), ∀ y ∈ Icc (cs i) (cs i.succ), dist (f x) (f y) < ε := by
+  have h_cs_bound : ∀ i : Fin k, ∀ x ∈ Icc (cs (Fin.castAdd _ i)) (cs i.succ), ∀ y ∈ Icc (cs (Fin.castAdd _ i)) (cs i.succ), dist (f x) (f y) < ε := by
     intro i x hx y hy
     have hx_I : x ∈ I := by
-      have h_lower : a ≤ cs i := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
+      have h_lower : a ≤ cs (Fin.castAdd _ i) := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
       have h_upper : cs i.succ ≤ b := by simpa [← h_cs_last] using h_cs_mono (Fin.le_last i.succ)
       exact Icc_subset_Icc h_lower h_upper hx
     have hy_I : y ∈ I := by
-      have h_lower : a ≤ cs i := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
+      have h_lower : a ≤ cs (Fin.castAdd _ i) := by simpa [← h_cs_0] using h_cs_mono (Fin.zero_le _)
       have h_upper : cs i.succ ≤ b := by simpa [← h_cs_last] using h_cs_mono (Fin.le_last i.succ)
       exact Icc_subset_Icc h_lower h_upper hy
     have h_dist_xy : dist x y < δ := by
-      have h_bound : dist x y ≤ cs i.succ - cs i := by exact Real.dist_le_of_mem_Icc hx hy
+      have h_bound : dist x y ≤ cs i.succ - cs (Fin.castAdd _ i) := by exact Real.dist_le_of_mem_Icc hx hy
       exact lt_of_le_of_lt h_bound (h_cs_diff i)
     exact hδ x hx_I y hy_I h_dist_xy
   exact ⟨k, cs, h_cs_0, h_cs_last, h_cs_mono, h_cs_D, h_cs_bound⟩
 
+open MeasureTheory in
 /-- Preliminary to Lemma 4.6 (simple-integral-cdf-difference) in blueprint. -/
 lemma CumulativeDistributionFunction.integral_indicator_eq (F : CumulativeDistributionFunction)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {a b : ℝ} (a_le_b : a ≤ b) (α : E) :
     ∫ x, (indicator (Ioc a b) (fun _ ↦ α)) x ∂ F.measure =
       (F b - F a) • α := by
-  have h_meas : MeasurableSet (Ioc a b) := measurableSet_Ioc
-  rw [MeasureTheory.integral_indicator h_meas, MeasureTheory.integral_const]
-  have h_cdf : F.measure (Ioc a b) = ENNReal.ofReal (F b - F a) :=
-    F.toStieltjesFunction.measure_Ioc a b
+  simp only [integral_indicator (show MeasurableSet (Ioc a b) from measurableSet_Ioc),
+             integral_const, MeasurableSet.univ, measureReal_restrict_apply, univ_inter]
   congr
-  simp [h_cdf, ENNReal.toReal_ofReal (sub_nonneg.mpr (F.mono a_le_b))]
+  simp [Measure.real, F.toStieltjesFunction.measure_Ioc a b,
+        ENNReal.toReal_ofReal (sub_nonneg.mpr (F.mono a_le_b))]
 
 /-- Lemma 4.6 (simple-integral-cdf-difference) in blueprint. -/
 lemma CumulativeDistributionFunction.integral_sum_indicator_eq (F : CumulativeDistributionFunction)
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
     {κ : Type*} {s : Finset κ} (as : κ → ℝ) (bs : κ → ℝ) (h : ∀ j, as j ≤ bs j) (α : κ → E) :
     ∫ x, ((∑ j ∈ s, indicator (Ioc (as j) (bs j)) (fun _ ↦ α j)) x) ∂ F.measure =
-      ∑ j in s, (F (bs j) - F (as j)) • α j := by
+      ∑ j ∈ s, (F (bs j) - F (as j)) • α j := by
   -- It may be worthwhile to think about an improved phrasing of this.
   -- The previous lemma `CumulativeDistributionFunction.integral_indicator_eq` should be
   -- the key anyway.
   have h_int_sum_change : ∫ (x : ℝ), (∑ j ∈ s, (Ioc (as j) (bs j)).indicator (fun x => α j)) x ∂F.measure  = ∑ j ∈ s, ∫ (x : ℝ), (Ioc (as j) (bs j)).indicator (fun x => α j) x ∂F.measure  := by
     rw [← MeasureTheory.integral_finset_sum]
-    simp_all only [measurableSet_Ioc, implies_true, Finset.sum_apply, MeasureTheory.integral_indicator_const]
+    simp_all only [Finset.sum_apply]
     intro j _
     exact (MeasureTheory.integrable_const (α j)).indicator measurableSet_Ioc
   rw [h_int_sum_change]
@@ -169,8 +169,8 @@ lemma tendsto_iff_forall_continuousAt_tendsto
   · intro h
     convert homeomorph_probabilityMeasure.symm.continuous.continuousAt.tendsto.comp h
     · ext1 i
-      exact EquivLike.inv_apply_eq_iff_eq_apply.mp rfl
-    · exact EquivLike.inv_apply_eq_iff_eq_apply.mp rfl
+      exact EquivLike.inv_apply_eq.mp rfl
+    · exact EquivLike.inv_apply_eq.mp rfl
 
 end CumulativeDistributionFunction
 

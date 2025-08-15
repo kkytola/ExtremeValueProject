@@ -31,7 +31,7 @@ lemma orientationPreservingAffineEquiv.mkOfCoefs_apply {a : ℝ} (a_pos : 0 < a)
     (mkOfCoefs a_pos b).val x = a * x + b :=
   rfl
 
-lemma orientationPreservingAffineEquiv.mkOfCoefs_val {a : ℝ} (a_pos : 0 < a) (b : ℝ) (x : ℝ) :
+lemma orientationPreservingAffineEquiv.mkOfCoefs_val {a : ℝ} (a_pos : 0 < a) (b : ℝ) :
     (mkOfCoefs a_pos b).val = AffineEquiv.mkOfCoefs_of_field a_pos.ne.symm b :=
   rfl
 
@@ -166,7 +166,7 @@ lemma isDegenerate_of_tendsto_shrinking
         have wow := Tendsto.congr' aux key'
         rw [tendsto_const_nhds_iff] at wow
         rw [x_eq, wow]
-      have x_gt : β < x := lt_of_le_of_ne (le_of_not_lt x_lt) ((Ne.eq_def _ _).symm ▸ x_eq).symm
+      have x_gt : β < x := lt_of_le_of_ne (le_of_not_gt x_lt) ((Ne.eq_def _ _).symm ▸ x_eq).symm
       simp [obs, this.2 _ x_gt]
   refine ⟨?_, ?_⟩
   · intro x hx
@@ -225,7 +225,7 @@ lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
       set qf := A (s k) • F (s k)
       exact (qf.mono) (s_spec k)
     exact (tendsto_le_of_eventuallyLE (left_tendsto x1_cont s_atTop)
-      (right_tendsto z_spec_cont s_atTop) (Eventually.of_forall ineq)).not_lt z_spec_lt
+      (right_tendsto z_spec_cont s_atTop) (Eventually.of_forall ineq)).not_gt z_spec_lt
   have ⟨above,claim_above⟩ : ∃ above, ∀ n, A n x2 < above := by
     by_contra not_bounded
     simp only [not_exists, not_forall, not_lt] at not_bounded
@@ -243,7 +243,7 @@ lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
       rw [←mulAction_apply_eq_self_apply (F (s k)) (A (s k)) x2]
       exact (A (s k) • F (s k)).mono (s_spec k)
     exact (tendsto_le_of_eventuallyLE (right_tendsto z_spec_cont s_atTop)
-      (left_tendsto x2_cont s_atTop) (Eventually.of_forall ineq)).not_lt z_spec_lt
+      (left_tendsto x2_cont s_atTop) (Eventually.of_forall ineq)).not_gt z_spec_lt
   set a := fun n ↦ (A n).val.toAffineMap.coefs_of_field.1
   have ⟨an_above, an_claim_above⟩ : ∃ a_above, ∀ n, a n < a_above := by
     use (above - below) / (x2 - x1)

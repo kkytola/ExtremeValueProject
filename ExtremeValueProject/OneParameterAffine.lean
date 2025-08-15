@@ -76,7 +76,7 @@ private lemma TopologicalSpace.SeparableSpace.countable_of_disjoint_of_isOpen_of
   have g_inj : Function.Injective g := by
     intro A B hAB
     by_contra maybe_ne
-    apply (As_disj A.prop B.prop (Subtype.coe_ne_coe.mpr maybe_ne)).not_mem_of_mem_left (hg A)
+    apply (As_disj A.prop B.prop (Subtype.coe_ne_coe.mpr maybe_ne)).notMem_of_mem_left (hg A)
     simpa [← hAB] using (hg B)
   rw [Set.countable_iff_exists_injective] at s_ctble ⊢
   obtain ⟨f, f_inj⟩ := s_ctble
@@ -127,7 +127,7 @@ lemma TopologicalSpace.SeparableSpace.countable_connectedComponents {α : Type*}
     rw [← hC₁, ← hC₂] at hA_ne ⊢
     exact connectedComponent_disjoint hA_ne
   · intro A hA
-    simp only [def_As, def_φ, mem_range, As, φ] at hA
+    simp only [def_As, mem_range, As, φ] at hA
     obtain ⟨C, hAC⟩ := hA
     simpa [← hAC] using isOpen_connectedComponent
 

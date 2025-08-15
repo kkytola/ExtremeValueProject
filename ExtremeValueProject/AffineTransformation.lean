@@ -123,9 +123,9 @@ def AffineEquiv.mkOfCoefs_of_field {𝕜 : Type*} [Field 𝕜] {a : 𝕜} (a_ne_
       left_inv x := by simp [← mul_assoc, inv_mul_cancel₀ a_ne_zero]
       right_inv x := by simp [← mul_assoc, mul_inv_cancel₀ a_ne_zero] }
   map_vadd' p v := by
-    simp only [AffineMap.mkOfCoefs_of_field, AffineMap.coe_mk, neg_mul, vadd_eq_add,
-               Equiv.coe_fn_mk, LinearEquiv.coe_mk]
+    simp [AffineMap.mkOfCoefs_of_field]
     ring
+
 
 @[simp] lemma AffineEquiv.mkOfCoefs_of_field_toAffineMap {𝕜 : Type*} [Field 𝕜]
     {a : 𝕜} (a_ne_zero : a ≠ 0) (b : 𝕜) :
