@@ -23,7 +23,7 @@ lemma eq_sUnion_connectedComponentIn (U : Set ℝ) :
     U = ⋃₀ {C | ∃ x ∈ U, C = connectedComponentIn U x} := by
   apply subset_antisymm
   · intro x x_in_U
-    simpa using ⟨connectedComponentIn U x, ⟨x, x_in_U, rfl⟩, mem_connectedComponentIn x_in_U⟩
+    simpa using ⟨x, x_in_U, mem_connectedComponentIn x_in_U⟩
   · simp only [sUnion_subset_iff, mem_setOf_eq, forall_exists_index, and_imp]
     intro C x x_in_U hC
     simpa [hC] using connectedComponentIn_subset U x
@@ -90,10 +90,10 @@ lemma TopologicalSpace.SeparableSpace.countable_of_disjoint_of_isOpen
   suffices (As \ {∅}).Countable from
     Countable.mono (show As ⊆ (As \ {∅}) ∪ {∅} by simp) (this.union (countable_singleton ∅))
   apply countable_of_disjoint_of_isOpen_of_nonempty sep
-  · exact As_disj.mono diff_subset
-  · exact fun A hA ↦ As_open A (mem_of_mem_diff hA)
+  · exact As_disj.mono sdiff_subset
+  · exact fun A hA ↦ As_open A (mem_of_mem_sdiff hA)
   · intro A hA
-    simp only [mem_diff, mem_singleton_iff] at hA
+    simp only [mem_sdiff, mem_singleton_iff] at hA
     exact nonempty_iff_ne_empty.mpr hA.2
 
 lemma ConnectedComponents.mk_eq_mk_iff {α : Type*} [TopologicalSpace α] {x y : α} :
@@ -158,7 +158,8 @@ lemma IsOpen.countable_setOf_connectedComponentIn
     have aux₂ := (mem_setOf_eq.mp C₂.prop).choose_spec
     rw [aux₁.2, aux₂.2]
     simp only [ψ, ConnectedComponents.coe_eq_coe] at hψC
-    simpa only [connectedComponentIn, aux₁.1, ↓reduceDIte, aux₂.1, image_val_inj] using hψC
+    rw [connectedComponentIn_eq_image aux₁.1, connectedComponentIn_eq_image aux₂.1]
+    exact congr_arg (Subtype.val '' ·) hψC
   exact Function.Injective.countable ψ_inj
 
 -- TODO: Hopefully this is not needed and `Real.convex_iff_isPreconnected` is enough.

@@ -134,7 +134,7 @@ lemma apply_eq_one_of_tendsto_of_gt
     linarith
 
   have : G' x ≥ 1 := by
-    by_contra
+    by_contra h
     linarith [this ((1 - G' x) / 2) (by linarith)]
   linarith [apply_le_one G' x]
 
@@ -250,7 +250,10 @@ lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
     intro n
     have x2x1_positive : 0 < x2 - x1 := by linarith
     have an_value (n) : a n = (A n x2 - A n x1) / (x2 - x1) := by
-      field_simp [←mul_sub_left_distrib] ; rfl
+      have hne : x2 - x1 ≠ 0 := ne_of_gt x2x1_positive
+      rw [eq_div_iff hne]
+      simp only [AffineIncrEquiv.apply_eq, a, AffineIncrEquiv.coefs]
+      ring
     have aux : ((A n) x2 - (A n) x1) < (above - below) := by
       linarith only [claim_below n, claim_above n]
     simpa [an_value n] using (div_lt_div_iff_of_pos_right x2x1_positive).mpr aux

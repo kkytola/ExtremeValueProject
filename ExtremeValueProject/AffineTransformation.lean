@@ -30,11 +30,14 @@ def AffineMap.coefs_of_field {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 
 are obtained by `AffineMap.coefs_of_field`. -/
 lemma AffineMap.apply_eq_of_field {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 𝕜) (x : 𝕜) :
     A x = A.coefs_of_field.1 * x + A.coefs_of_field.2 := by
-  rw [← add_zero x]
-  convert A.map_vadd 0 x
-  · funext r
-    simp [AffineMap.coefs_of_field]
-  · simp
+  have hmain : A x = A.linear x + A 0 := by
+    have := A.map_vadd 0 x; simp only [vadd_eq_add, add_zero] at this; exact this
+  have hlin : A.linear x = A.coefs_of_field.1 * x := by
+    simp only [AffineMap.coefs_of_field]
+    have h := A.linear.map_smul x (1 : 𝕜)
+    simp only [smul_eq_mul, mul_one] at h
+    rw [h, show (LinearMap.ringLmapEquivSelf 𝕜 𝕜 𝕜) A.linear = A.linear 1 from rfl]; ring
+  rw [hmain, hlin, show A.coefs_of_field.2 = A 0 from rfl]
 
 lemma AffineMap.coefsOfField_fst_eq_div_sub {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 𝕜)
     {x y : 𝕜} (hxy : x ≠ y) :
@@ -223,9 +226,10 @@ lemma AffineEquiv.isOrientationPreserving_iff_mono (A : ℝ ≃ᵃ[ℝ] ℝ) :
 /-- The subgroup of affine isomorphishs ℝ → ℝ which are orientation preserving. -/
 noncomputable def orientationPreservingAffineEquiv : Subgroup (ℝ ≃ᵃ[ℝ] ℝ) where
   carrier := AffineEquiv.IsOrientationPreserving
-  mul_mem' := by
-    simp_rw [mem_def, AffineEquiv.isOrientationPreserving_iff_mono]
-    exact Monotone.comp
+  mul_mem' := fun ha hb =>
+    (AffineEquiv.isOrientationPreserving_iff_mono _).mpr
+      (((AffineEquiv.isOrientationPreserving_iff_mono _).mp ha).comp
+       ((AffineEquiv.isOrientationPreserving_iff_mono _).mp hb))
   one_mem' := Real.zero_lt_one
   inv_mem' := by
     intro x hx
@@ -234,8 +238,11 @@ noncomputable def orientationPreservingAffineEquiv : Subgroup (ℝ ≃ᵃ[ℝ] �
 /-- Orientation preserving affine isomorphisms ℝ → ℝ are continuous. -/
 lemma orientationPreservingAffineEquiv.continuous (A : orientationPreservingAffineEquiv) :
     Continuous (A : ℝ → ℝ) := by
-  apply (AffineMap.continuous_iff (R := ℝ) (E := ℝ) (F := ℝ) (f := A)).mpr
-  exact LinearMap.continuous_of_finiteDimensional _
+  have h : (A : ℝ → ℝ) = fun x ↦ A.val.toAffineMap.coefs_of_field.1 * x +
+                                   A.val.toAffineMap.coefs_of_field.2 :=
+    funext (fun x ↦ A.val.apply_eq_of_field x)
+  rw [h]
+  exact (continuous_const.mul continuous_id).add continuous_const
 
 lemma orientationPreservingAffineEquiv.monotone (A : orientationPreservingAffineEquiv) :
     Monotone (A : ℝ → ℝ) :=
@@ -528,7 +535,7 @@ noncomputable def affineTransform
       have Binv_B (z) : B⁻¹ (B z) = z := (AffineEquiv.apply_eq_iff_eq_symm_apply _).mpr rfl
       ext z
       refine ⟨fun hBz ↦ ?_, fun hBiz ↦ ?_⟩
-      · refine ⟨B⁻¹ z, by simpa only [Binv_B] using (B⁻¹).mono hBz, B_Binv z⟩
+      · refine ⟨B⁻¹ z, by simpa only [Binv_B, Set.mem_Ici] using (B⁻¹).mono hBz, B_Binv z⟩
       · obtain ⟨w, hw, Bw_eq⟩ := hBiz
         simpa [← Bw_eq] using B.mono hw
     intro x
@@ -539,7 +546,7 @@ noncomputable def affineTransform
     apply Filter.Tendsto.comp F.tendsto_atTop
     · refine Monotone.tendsto_atTop_atTop (A⁻¹).mono ?A_inv_is_top_unbounded
       intro b
-      refine ⟨A b, le_of_eq <| EquivLike.inv_apply_eq_iff_eq_apply.mp rfl⟩
+      refine ⟨A b, le_of_eq (EquivLike.left_inv A b).symm⟩
   tendsto_atBot := by
     apply Filter.Tendsto.comp F.tendsto_atBot
     · refine Monotone.tendsto_atBot_atBot (A⁻¹).mono ?A_inv_is_bottom_unbounded
@@ -575,7 +582,7 @@ noncomputable instance instMulActionAffineIncrEquiv :
     (A • F) (A x) = F x := by
   simp only [CumulativeDistributionFunction.mulAction_apply_eq]
   congr
-  exact (EquivLike.inv_apply_eq_iff_eq_apply (e := A) (b := A x) (a := x)).mpr rfl
+  exact EquivLike.left_inv A x
 
 -- Lemma: If X is a ℝ-valued random variable with c.d.f. F, then the c.d.f. of A • X is A • F.
 
@@ -606,7 +613,7 @@ lemma affine_continuousAt_iff
     simp
   · intro F_cont
     convert affine_continuousAt_of_continuousAt F_cont A
-    exact EquivLike.inv_apply_eq_iff_eq_apply.mp rfl
+    exact (EquivLike.right_inv A x).symm
 
 end CumulativeDistributionFunction
 
@@ -645,10 +652,10 @@ lemma AffineEquiv.extend_bot' (A : ℝ ≃ᵃ[ℝ] ℝ) :
   have obs : A.toAffineMap.coefs_of_field.1 ≠ 0 :=
     coefs_of_field_fst_ne_zero A
   by_cases hA : 0 < A.toAffineMap.coefs_of_field.1
-  · simp [AffineMap.extend, hA]
+  · simp [AffineMap.extend, hA]; rfl
   · simp only [ne_eq, not_lt] at *
     have hA' : A.toAffineMap.coefs_of_field.1 < 0 := lt_of_le_of_ne hA obs
-    simp [AffineMap.extend, hA']
+    simp [AffineMap.extend, hA']; rfl
 
 lemma AffineEquiv.extend_top' (A : ℝ ≃ᵃ[ℝ] ℝ) :
     A.toAffineMap.extend ⊤ =
@@ -656,10 +663,10 @@ lemma AffineEquiv.extend_top' (A : ℝ ≃ᵃ[ℝ] ℝ) :
   have obs : A.toAffineMap.coefs_of_field.1 ≠ 0 :=
     coefs_of_field_fst_ne_zero A
   by_cases hA : 0 < A.toAffineMap.coefs_of_field.1
-  · simp [AffineMap.extend, hA]
+  · simp [AffineMap.extend, hA]; rfl
   · simp only [ne_eq, not_lt] at *
     have hA' : A.toAffineMap.coefs_of_field.1 < 0 := lt_of_le_of_ne hA obs
-    simp [AffineMap.extend, hA']
+    simp [AffineMap.extend, hA']; rfl
 
 lemma AffineEquiv.extend_symm_cancel (A : ℝ ≃ᵃ[ℝ] ℝ) (x : EReal) :
     A.symm.toAffineMap.extend (A.toAffineMap.extend x) = x := by
@@ -717,11 +724,13 @@ noncomputable abbrev AffineIncrEquiv.extend (A : AffineIncrEquiv) : EReal ≃ ER
 
 @[simp] lemma AffineIncrEquiv.extend_bot (A : AffineIncrEquiv) :
     A.extend ⊥ = ⊥ := by
-  simpa using A.isOrientationPreserving
+  have h : 0 < A.val.toAffineMap.coefs_of_field.1 := A.isOrientationPreserving
+  simp [AffineIncrEquiv.extend, AffineEquiv.extend_bot, h]
 
 @[simp] lemma AffineIncrEquiv.extend_top (A : AffineIncrEquiv) :
     A.extend ⊤ = ⊤ := by
-  simpa using A.isOrientationPreserving
+  have h : 0 < A.val.toAffineMap.coefs_of_field.1 := A.isOrientationPreserving
+  simp [AffineIncrEquiv.extend, AffineEquiv.extend_top, h]
 
 @[simp] lemma AffineIncrEquiv.extend_ofReal (A : AffineIncrEquiv) (x : ℝ) :
     A.extend x = A x :=

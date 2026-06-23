@@ -36,7 +36,7 @@ private lemma _root_.MeasureTheory.Measure.right_continuous_cdf'
   intro V hV
   obtain ⟨y, x_lt_y, Ioo_x_y_subset⟩ : ∃ u, x < u ∧ Ioo x u ⊆ ⇑μ ∘ Iic ⁻¹' V := by
     simpa [mem_nhdsGT_iff_exists_Ioo_subset] using key hV
-  simp only [mem_nhdsGE_iff_exists_Ico_subset, mem_map, mem_Ioi, exists_prop]
+  simp only [mem_nhdsGE_iff_exists_Ico_subset, mem_map, mem_Ioi]
   refine ⟨y, ⟨x_lt_y, ?_⟩⟩
   intros z hz
   by_cases h: x = z
@@ -56,7 +56,7 @@ private lemma MeasureTheory.FiniteMeasure.right_continuous_cdf'
   apply ContinuousWithinAt.comp (β := ℝ≥0∞)
     (f := fun z ↦ μ (Iic z)) (g := ENNReal.toNNReal) (t := {u | u ≠ ∞})
   · apply ENNReal.continuousOn_toNNReal
-    simpa only [ennreal_mass] using coe_ne_top
+    simpa only [ennreal_mass, Set.mem_setOf_eq] using coe_ne_top
   · simpa only [FiniteMeasure.ennreal_coeFn_eq_coeFn_toMeasure] using key
   · simp only [FiniteMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
     intro z _
@@ -73,19 +73,19 @@ private lemma MeasureTheory.FiniteMeasure.right_continuous_cdf
     simp
 
 /-- The cumulative distribution function of a finite measure on ℝ. -/
-def MeasureTheory.FiniteMeasure.cdf (μ : FiniteMeasure ℝ) : StieltjesFunction where
+def MeasureTheory.FiniteMeasure.cdf (μ : FiniteMeasure ℝ) : StieltjesFunction ℝ where
   toFun := fun x ↦ μ (Iic x)
   mono' := fun _ _ h ↦ apply_mono _ (Iic_subset_Iic.mpr h)
   right_continuous' := MeasureTheory.FiniteMeasure.right_continuous_cdf μ
 
 /-- The type of cumulative distribution functions of Borel probability measures on ℝ. -/
-@[ext] structure CumulativeDistributionFunction extends StieltjesFunction where
+@[ext] structure CumulativeDistributionFunction extends StieltjesFunction ℝ where
   tendsto_atTop : Tendsto toFun atTop (𝓝 (1 : ℝ))
   tendsto_atBot : Tendsto toFun atBot (𝓝 (0 : ℝ))
 
 namespace CumulativeDistributionFunction
 
-instance : Coe CumulativeDistributionFunction StieltjesFunction where
+instance : Coe CumulativeDistributionFunction (StieltjesFunction ℝ) where
   coe := CumulativeDistributionFunction.toStieltjesFunction
 
 instance : CoeFun CumulativeDistributionFunction (fun _ ↦ ℝ → ℝ) where
@@ -101,7 +101,7 @@ lemma apply_le_one (F : CumulativeDistributionFunction) (x : ℝ) :
 
 lemma apply_eq_measure_Iic (F : CumulativeDistributionFunction) (x : ℝ) :
     F x = ENNReal.toReal (F.measure (Iic x)) := by
-  simp only [StieltjesFunction.measure_Iic F F.tendsto_atBot x, sub_zero,
+  simp only [F.toStieltjesFunction.measure_Iic F.tendsto_atBot x, sub_zero,
              ENNReal.toReal_ofReal (F.apply_nonneg x)]
 
 /-- The cumulative distribution function of a probability measure on ℝ. -/
@@ -121,14 +121,14 @@ lemma _root_.MeasureTheory.ProbabilityMeasure.cdf_toStieltjesFunction_apply_eq (
 instance isProbabilityMeasure_measure_coe (F : CumulativeDistributionFunction) :
     IsProbabilityMeasure F.measure := by
   constructor
-  rw [@StieltjesFunction.measure_univ F 0 1 F.tendsto_atBot F.tendsto_atTop]
+  rw [F.toStieltjesFunction.measure_univ F.tendsto_atBot F.tendsto_atTop]
   simp only [sub_zero, ofReal_one]
 
 /-- The measure associated to the cdf of a probability measure is the same probability measure. -/
 lemma _root_.MeasureTheory.ProbabilityMeasure.measure_cdf (μ : ProbabilityMeasure ℝ) :
-    (μ.cdf : StieltjesFunction).measure = μ := by
-  refine Measure.ext_of_Iic (μ.cdf : StieltjesFunction).measure μ (fun x ↦ ?_)
-  simp only [StieltjesFunction.measure_Iic _ (ProbabilityMeasure.cdf μ).tendsto_atBot,
+    (μ.cdf : StieltjesFunction ℝ).measure = μ := by
+  refine Measure.ext_of_Iic (μ.cdf : StieltjesFunction ℝ).measure μ (fun x ↦ ?_)
+  simp only [μ.cdf.toStieltjesFunction.measure_Iic μ.cdf.tendsto_atBot,
     μ.cdf_toStieltjesFunction_apply_eq x, sub_zero, ofReal_coe_nnreal,
     ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
 
@@ -191,9 +191,10 @@ lemma tendsto_apply_of_tendsto_of_continuousAt {ι : Type*} {L : Filter ι}
     {μs : ι → ProbabilityMeasure ℝ} {μ : ProbabilityMeasure ℝ} (weak_lim : Tendsto μs L (𝓝 μ))
     {x : ℝ} (cont : ContinuousAt μ.cdf x) :
     Tendsto (fun i ↦ (μs i).cdf x) L (𝓝 (μ.cdf x)) := by
-  convert (NNReal.continuous_coe.tendsto _).comp <|
-    ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto weak_lim ?_
-  simp only [nonempty_Ioi, frontier_Iic']
+  simp_rw [ProbabilityMeasure.cdf_apply_eq]
+  apply (NNReal.continuous_coe.tendsto _).comp
+  apply ProbabilityMeasure.tendsto_measure_of_null_frontier_of_tendsto weak_lim
+  rw [frontier_Iic]
   have aux := (μ.cdf.continuousAt_iff x).mp cont
   rw [ProbabilityMeasure.measure_cdf μ] at aux
   exact (ProbabilityMeasure.null_iff_toMeasure_null μ {x}).mpr aux

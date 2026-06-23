@@ -146,7 +146,8 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
                 from mul_pos (by linarith) (by linarith)]
     apply le_antisymm
     · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
-    · simpa only [← Gx_sq] using G.mono obs.le
+    · rw [← Gx_sq, CumulativeDistributionFunction.mulAction_apply_eq G (homOfIndex α c (Real.log 2)) x]
+      exact G.mono obs.le
   have Gx_eq_01 : G x = 0 ∨ G x = 1 := by
     rw [← sub_eq_zero (b := (1 : ℝ)), ← mul_eq_zero]
     linarith
@@ -163,10 +164,9 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
       apply tendsto_exp_atTop.comp
       simp only [tendsto_neg_atTop_iff]
       exact (tendsto_mul_const_atBot_of_pos α_pos).mpr tendsto_id
-    convert same_but using 1
-    ext s
-    simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, neg_mul, homOfIndex_coefs_snd]
-    ring
+    exact same_but.congr fun s => by
+      simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, neg_mul, homOfIndex_coefs_snd]
+      ring
   have oops (s) : G ((homOfIndex α c s)⁻¹ x) = 1 := by
     change (homOfIndex α c s • G) x = 1
     rw [Gx_pow s] -- (Keep this as a separate step to avoid risk of unwanted simping.)
@@ -313,7 +313,8 @@ theorem classification {G : CumulativeDistributionFunction}
           simp [show Real.log 2 * β < 0 from mul_neg_of_pos_of_neg (log_pos one_lt_two) β_neg]
         apply le_antisymm
         · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
-        · simpa only [← Gx_sq] using G.mono obs.le
+        · rw [← Gx_sq, CumulativeDistributionFunction.mulAction_apply_eq G (homOfIndex₀ β (Real.log 2)) x]
+          exact G.mono obs.le
       have Gx_eq_01 : G x = 0 ∨ G x = 1 := by
         rw [← sub_eq_zero (b := (1 : ℝ)), ← mul_eq_zero]
         linarith

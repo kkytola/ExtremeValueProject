@@ -70,7 +70,7 @@ lemma extend_mono (F : CumulativeDistributionFunction) :
   | ⊥ => simp
   | ⊤ => simp [eq_top_iff.mpr hxy]
   | some (some ξ) => match y with
-    | ⊥ => simp at hxy -- contradiction
+    | ⊥ => exact absurd (le_bot_iff.mp hxy) (EReal.coe_ne_bot ξ)
     | ⊤ => simpa using extend_le_one _ _
     | some (some η) =>
       have ξ_le_η : ξ ≤ η := EReal.coe_le_coe_iff.mp hxy
@@ -82,9 +82,9 @@ lemma extend_affine (F : CumulativeDistributionFunction) (A : AffineIncrEquiv) :
   simp only [extend, mulAction_apply_eq, Function.comp_apply]
   match x with
   | ⊥ =>
-    rw [AffineIncrEquiv.extend_bot]
+    rw [AffineIncrEquiv.extend_bot]; rfl
   | ⊤ =>
-    rw [AffineIncrEquiv.extend_top]
+    rw [AffineIncrEquiv.extend_top]; rfl
   | some (some ξ) =>
     have aux : (A • F).extend ξ = F.extend ((A⁻¹).extend ξ) := by
       simp only [extend_ofReal, mulAction_apply_eq, AffineEquiv.extend_ofReal]
@@ -119,9 +119,9 @@ lemma extend_apply_eq_map_measure_Iic (F : CumulativeDistributionFunction) (x : 
   match x with
   | ⊥ =>
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
-    convert show 0 = F.measure ∅ by simp
-    ext x
-    simp
+    have h : (fun x : ℝ ↦ (x : EReal)) ⁻¹' Set.Iic ⊥ = ∅ := by
+      ext x; simp [EReal.coe_ne_bot]
+    rw [h, measure_empty]; exact extend_bot F
   | ⊤ =>
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
     simp
