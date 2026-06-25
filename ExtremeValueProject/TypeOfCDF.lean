@@ -74,7 +74,7 @@ lemma apply_eq_one_of_tendsto_of_gt
       Tendsto (fun n ↦ ((mkOfCoefs (a_pos n) (b n)) • (F n)) x) atTop (𝓝 (G' x)))
     {x : ℝ} (x_gt : β < x) :
     G' x = 1 := by
-  have (ε : ℝ) (ε_pos : ε > 0) : G' x > 1 - ε := by
+  have G'x_large (ε : ℝ) (ε_pos : ε > 0) : G' x > 1 - ε := by
 
     have dense_cont_pts (H : CumulativeDistributionFunction) : Dense {x | ContinuousAt H x} := by
       simpa [compl] using dense_compl (𝕜 := ℝ) (countable_not_continuousAt H.mono')
@@ -135,7 +135,7 @@ lemma apply_eq_one_of_tendsto_of_gt
 
   have : G' x ≥ 1 := by
     by_contra h
-    linarith [this ((1 - G' x) / 2) (by linarith)]
+    linarith [G'x_large ((1 - G' x) / 2) (by linarith)]
   linarith [apply_le_one G' x]
 
 open AffineIncrEquiv in

@@ -146,8 +146,7 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
                 from mul_pos (by linarith) (by linarith)]
     apply le_antisymm
     · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
-    · rw [← Gx_sq, CumulativeDistributionFunction.mulAction_apply_eq G (homOfIndex α c (Real.log 2)) x]
-      exact G.mono obs.le
+    · simpa [← Gx_sq] using G.mono obs.le
   have Gx_eq_01 : G x = 0 ∨ G x = 1 := by
     rw [← sub_eq_zero (b := (1 : ℝ)), ← mul_eq_zero]
     linarith
@@ -313,8 +312,7 @@ theorem classification {G : CumulativeDistributionFunction}
           simp [show Real.log 2 * β < 0 from mul_neg_of_pos_of_neg (log_pos one_lt_two) β_neg]
         apply le_antisymm
         · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
-        · rw [← Gx_sq, CumulativeDistributionFunction.mulAction_apply_eq G (homOfIndex₀ β (Real.log 2)) x]
-          exact G.mono obs.le
+        · simpa [← Gx_sq] using G.mono obs.le
       have Gx_eq_01 : G x = 0 ∨ G x = 1 := by
         rw [← sub_eq_zero (b := (1 : ℝ)), ← mul_eq_zero]
         linarith

@@ -123,10 +123,9 @@ lemma eq_diracProba_of_isDegenerate (μ : ProbabilityMeasure ℝ) (degen : μ.cd
   simp only [show ⇑μ.cdf = (fun x ↦ (μ (Iic x)).toReal)
               by ext x ; rw [ProbabilityMeasure.cdf_apply_eq]] at h
   have measure_Iic_eq_one : μ.toMeasure (Iic x₀) = 1 := by
-    have h₀ := congr_fun h x₀
-    simp only [mem_Ici, le_refl, indicator_of_mem] at h₀
-    have hnn : (μ (Iic x₀) : ℝ≥0) = 1 := by exact_mod_cast h₀
-    rw [← ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure, hnn, ENNReal.coe_one]
+    have full_measure : (μ (Iic x₀) : ℝ≥0) = 1 := by
+      simpa [mem_Ici, le_refl, indicator_of_mem] using congr_fun h x₀
+    simp [← ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure, full_measure]
   have measure_Iio_eq_zero : μ.toMeasure (Iio x₀) = 0 := by
     apply measure_null_of_locally_null
     intro x (x_lt_x₀ : x < x₀)

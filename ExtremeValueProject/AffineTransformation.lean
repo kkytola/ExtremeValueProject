@@ -30,14 +30,9 @@ def AffineMap.coefs_of_field {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 
 are obtained by `AffineMap.coefs_of_field`. -/
 lemma AffineMap.apply_eq_of_field {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 𝕜) (x : 𝕜) :
     A x = A.coefs_of_field.1 * x + A.coefs_of_field.2 := by
-  have hmain : A x = A.linear x + A 0 := by
-    have := A.map_vadd 0 x; simp only [vadd_eq_add, add_zero] at this; exact this
-  have hlin : A.linear x = A.coefs_of_field.1 * x := by
-    simp only [AffineMap.coefs_of_field]
-    have h := A.linear.map_smul x (1 : 𝕜)
-    simp only [smul_eq_mul, mul_one] at h
-    rw [h, show (LinearMap.ringLmapEquivSelf 𝕜 𝕜 𝕜) A.linear = A.linear 1 from rfl]; ring
-  rw [hmain, hlin, show A.coefs_of_field.2 = A 0 from rfl]
+  convert A.map_vadd 0 x
+  · simp
+  · simp [AffineMap.coefs_of_field]
 
 lemma AffineMap.coefsOfField_fst_eq_div_sub {𝕜 : Type*} [Field 𝕜] (A : 𝕜 →ᵃ[𝕜] 𝕜)
     {x y : 𝕜} (hxy : x ≠ y) :
@@ -226,7 +221,7 @@ lemma AffineEquiv.isOrientationPreserving_iff_mono (A : ℝ ≃ᵃ[ℝ] ℝ) :
 /-- The subgroup of affine isomorphishs ℝ → ℝ which are orientation preserving. -/
 noncomputable def orientationPreservingAffineEquiv : Subgroup (ℝ ≃ᵃ[ℝ] ℝ) where
   carrier := AffineEquiv.IsOrientationPreserving
-  mul_mem' := fun ha hb =>
+  mul_mem' := fun ha hb ↦
     (AffineEquiv.isOrientationPreserving_iff_mono _).mpr
       (((AffineEquiv.isOrientationPreserving_iff_mono _).mp ha).comp
        ((AffineEquiv.isOrientationPreserving_iff_mono _).mp hb))
@@ -238,11 +233,8 @@ noncomputable def orientationPreservingAffineEquiv : Subgroup (ℝ ≃ᵃ[ℝ] �
 /-- Orientation preserving affine isomorphisms ℝ → ℝ are continuous. -/
 lemma orientationPreservingAffineEquiv.continuous (A : orientationPreservingAffineEquiv) :
     Continuous (A : ℝ → ℝ) := by
-  have h : (A : ℝ → ℝ) = fun x ↦ A.val.toAffineMap.coefs_of_field.1 * x +
-                                   A.val.toAffineMap.coefs_of_field.2 :=
-    funext (fun x ↦ A.val.apply_eq_of_field x)
-  rw [h]
-  exact (continuous_const.mul continuous_id).add continuous_const
+  apply (AffineMap.continuous_linear_iff (P := ℝ) (R := ℝ) (Q := ℝ) (f := A)).symm.mpr
+  exact LinearMap.continuous_of_finiteDimensional _
 
 lemma orientationPreservingAffineEquiv.monotone (A : orientationPreservingAffineEquiv) :
     Monotone (A : ℝ → ℝ) :=

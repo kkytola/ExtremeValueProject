@@ -119,9 +119,10 @@ lemma extend_apply_eq_map_measure_Iic (F : CumulativeDistributionFunction) (x : 
   match x with
   | ⊥ =>
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
-    have h : (fun x : ℝ ↦ (x : EReal)) ⁻¹' Set.Iic ⊥ = ∅ := by
-      ext x; simp [EReal.coe_ne_bot]
-    rw [h, measure_empty]; exact extend_bot F
+    convert show 0 = F.measure ∅ by simp
+    · simp
+    · ext x
+      simp
   | ⊤ =>
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
     simp
