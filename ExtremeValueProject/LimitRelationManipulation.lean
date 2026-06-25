@@ -206,8 +206,7 @@ lemma tendsto_smul_apply_smul_deriv_of_tendsto_atTop_of_tendsto_mul
     have a_lim : L.Tendsto a (𝓝 0) :=
       tendsto_zero_of_tendsto_atTop_of_tendsto_smul (v := c) id (by aesop) m_to_infty a_in_s hma
     rw [hasDerivAt_iff_hasFDerivAt, hasFDerivAt_iff_isLittleO_nhds_zero] at hDf
-    simp only [zero_add, hf, sub_zero, ContinuousLinearMap.smulRight_apply,
-               ContinuousLinearMap.one_apply] at hDf
+    simp only [zero_add, hf, sub_zero] at hDf
     apply IsLittleO.comp_tendsto hDf a_lim
   have ma_isBigO : (fun i ↦ m i * a i) =O[L] fun _ ↦ (1 : ℝ) := by
     apply mul_isBigO_one_of_tendsto_atTop_of_tendsto_smul_apply (v := c) id rfl (by aesop)

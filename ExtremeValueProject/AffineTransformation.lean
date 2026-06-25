@@ -208,8 +208,7 @@ lemma AffineEquiv.isOrientationPreserving_iff_mono (A : ℝ ≃ᵃ[ℝ] ℝ) :
   have in_other_words (x) : A x = a * x + b := AffineMap.apply_eq_of_field A x
   simp_rw [in_other_words]
   constructor
-  · intro a_pos
-    intro x y x_le_y
+  · intro a_pos x y x_le_y
     simpa using (mul_le_mul_iff_of_pos_left a_pos).mpr x_le_y
   · intro mono
     have key := mono zero_le_one
