@@ -97,9 +97,7 @@ lemma sub_smul_deriv_isLittleO_of_tendsto_atTop_of_tendsto_smul_apply {ι : Type
 
 
   have hDf' : (fun x' => f x' - x' • D) =o[𝓝 0] (fun x' => x') := by
-    have h := hDf.isLittleO
-    simp only [hf, sub_zero] at h
-    exact h
+    simpa only [hf, sub_zero] using hDf.isLittleO
   rw [isLittleO_iff] at hDf' ⊢
   intro c c_pos
   specialize hDf' c_pos
