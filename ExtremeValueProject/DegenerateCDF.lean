@@ -67,14 +67,14 @@ lemma isDegenerate_iff (F : CumulativeDistributionFunction) :
     simp only [indicator, mem_Ici]
     by_cases hx : x₀ ≤ x
     · simp only [hx, ↓reduceIte]
-      cases' lt_or_eq_of_le hx with x₀_lt x₀_eq
+      rcases lt_or_eq_of_le hx with x₀_lt | x₀_eq
       · exact one_after_x₀ x x₀_lt
       · simpa [← x₀_eq] using one_at_x₀
     · simp only [hx, ↓reduceIte]
       rw [← Iff.not_left (obs x)]
-      apply not_mem_of_lt_csInf (not_le.mp hx) bounded_below
+      apply notMem_of_lt_csInf (not_le.mp hx) bounded_below
   · intro ⟨x₀, h⟩ x
-    simp [h, lt_or_le]
+    simp [h, lt_or_ge]
 
 -- TODO: This probably belongs to Mathlib?
 lemma _root_.MeasureTheory.diracProba_apply' {X : Type*} [MeasurableSpace X] (x₀ : X)
@@ -107,9 +107,9 @@ lemma diracProba_is_degenerate (x₀ : ℝ) :
   ext x
   simp [cdf_diracProba_apply, indicator]
   by_cases hx : x < x₀
-  · have aux : ¬ (x₀ ≤ x) := by exact not_le_of_lt hx
+  · have aux : ¬ (x₀ ≤ x) := by exact not_le_of_gt hx
     simp [hx, aux]
-  · have aux : x₀ ≤ x := by exact le_of_not_lt hx
+  · have aux : x₀ ≤ x := by exact not_lt.mp hx
     simp [hx, aux]
 
 /-- If the c.d.f. of a probability measure μ on ℝ is degenerate, then μ is the Dirac delta mass
@@ -123,7 +123,9 @@ lemma eq_diracProba_of_isDegenerate (μ : ProbabilityMeasure ℝ) (degen : μ.cd
   simp only [show ⇑μ.cdf = (fun x ↦ (μ (Iic x)).toReal)
               by ext x ; rw [ProbabilityMeasure.cdf_apply_eq]] at h
   have measure_Iic_eq_one : μ.toMeasure (Iic x₀) = 1 := by
-    simpa only [← toReal_eq_one_iff, mem_Ici, le_refl, indicator_of_mem] using congr_fun h x₀
+    have full_measure : (μ (Iic x₀) : ℝ≥0) = 1 := by
+      simpa [mem_Ici, le_refl, indicator_of_mem] using congr_fun h x₀
+    simp [← ProbabilityMeasure.ennreal_coeFn_eq_coeFn_toMeasure, full_measure]
   have measure_Iio_eq_zero : μ.toMeasure (Iio x₀) = 0 := by
     apply measure_null_of_locally_null
     intro x (x_lt_x₀ : x < x₀)
@@ -131,8 +133,8 @@ lemma eq_diracProba_of_isDegenerate (μ : ProbabilityMeasure ℝ) (degen : μ.cd
     use Iic x₁, mem_inf_of_left (Iic_mem_nhds x_lt_x₁)
     simpa [x₁_lt_x₀] using congr_fun h x₁
   have measure_x₀_eq_one : μ.toMeasure {x₀} = 1 := by
-    rw [← Iic_diff_Iio_same,
-        measure_diff Iio_subset_Iic_self nullMeasurableSet_Iio (measure_ne_top μ (Iio x₀)),
+    rw [← Iic_sdiff_Iio_same,
+        measure_sdiff Iio_subset_Iic_self nullMeasurableSet_Iio (measure_ne_top μ (Iio x₀)),
         measure_Iic_eq_one, measure_Iio_eq_zero, tsub_zero]
   have measure_eq_one_of_contains_x₀ {s : Set ℝ} (hx₀ : x₀ ∈ s) : μ.toMeasure s = 1 := by
     rw [← one_le_prob_iff, ← measure_x₀_eq_one]

@@ -94,13 +94,12 @@ lemma sub_smul_deriv_isLittleO_of_tendsto_atTop_of_tendsto_smul_apply {ι : Type
     (fun i ↦ f (a i) - a i • D) =o[L] a := by
   have a_lim : Tendsto a L (𝓝 0) :=
     tendsto_zero_of_tendsto_atTop_of_tendsto_smul f hs m_to_infty a_in_s ha
-  simp only [hasDerivAt_iff_hasFDerivAt, HasFDerivAt, hasFDerivAtFilter_iff_isLittleOTVS, hf,
-             sub_zero, ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply] at hDf
-  rw [isLittleOTVS_iff_isLittleO] at hDf
-  rw [isLittleO_iff] at hDf ⊢
+  have hDf' : (fun x' => f x' - x' • D) =o[𝓝 0] (fun x' => x') := by
+    simpa only [hf, sub_zero] using hDf.isLittleO
+  rw [isLittleO_iff] at hDf' ⊢
   intro c c_pos
-  specialize hDf c_pos
-  exact Eventually.filter_mono (tendsto_iff_comap.mp a_lim) (hDf.comap a)
+  specialize hDf' c_pos
+  exact Eventually.filter_mono (tendsto_iff_comap.mp a_lim) (hDf'.comap a)
 
 lemma eventually_norm_apply_ge_mul_self_of_tendsto_atTop_of_tendsto_smul_apply
     {ι : Type*} {L : Filter ι} {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {v : E}
@@ -205,8 +204,7 @@ lemma tendsto_smul_apply_smul_deriv_of_tendsto_atTop_of_tendsto_mul
     have a_lim : L.Tendsto a (𝓝 0) :=
       tendsto_zero_of_tendsto_atTop_of_tendsto_smul (v := c) id (by aesop) m_to_infty a_in_s hma
     rw [hasDerivAt_iff_hasFDerivAt, hasFDerivAt_iff_isLittleO_nhds_zero] at hDf
-    simp only [zero_add, hf, sub_zero, ContinuousLinearMap.smulRight_apply,
-               ContinuousLinearMap.one_apply] at hDf
+    simp only [zero_add, hf, sub_zero] at hDf
     apply IsLittleO.comp_tendsto hDf a_lim
   have ma_isBigO : (fun i ↦ m i * a i) =O[L] fun _ ↦ (1 : ℝ) := by
     apply mul_isBigO_one_of_tendsto_atTop_of_tendsto_smul_apply (v := c) id rfl (by aesop)
@@ -260,7 +258,7 @@ lemma ev_limit_iff_log_ev_limit {F G : CumulativeDistributionFunction}
       · apply pow_pos
         by_contra con
         simp [le_antisymm (not_lt.mp con) ((As n • F).apply_nonneg x)] at hn
-    exact Tendsto.congr' obs (by simpa [Real.log_pow] using h)
+    exact Tendsto.congr' obs (by simpa [Real.log_pow, Function.comp_def] using h)
 
 lemma tendsto_one_of_ev_limit {F G : CumulativeDistributionFunction}
     {As : ℕ → AffineIncrEquiv} {x : ℝ} (hGx : G x ∈ Ioo 0 1)

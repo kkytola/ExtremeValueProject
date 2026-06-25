@@ -74,7 +74,7 @@ lemma apply_eq_one_of_tendsto_of_gt
       Tendsto (fun n ↦ ((mkOfCoefs (a_pos n) (b n)) • (F n)) x) atTop (𝓝 (G' x)))
     {x : ℝ} (x_gt : β < x) :
     G' x = 1 := by
-  have (ε : ℝ) (ε_pos : ε > 0) : G' x > 1 - ε := by
+  have G'x_large (ε : ℝ) (ε_pos : ε > 0) : G' x > 1 - ε := by
 
     have dense_cont_pts (H : CumulativeDistributionFunction) : Dense {x | ContinuousAt H x} := by
       simpa [compl] using dense_compl (𝕜 := ℝ) (countable_not_continuousAt H.mono')
@@ -134,8 +134,8 @@ lemma apply_eq_one_of_tendsto_of_gt
     linarith
 
   have : G' x ≥ 1 := by
-    by_contra
-    linarith [this ((1 - G' x) / 2) (by linarith)]
+    by_contra h
+    linarith [G'x_large ((1 - G' x) / 2) (by linarith)]
   linarith [apply_le_one G' x]
 
 open AffineIncrEquiv in
@@ -250,7 +250,9 @@ lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
     intro n
     have x2x1_positive : 0 < x2 - x1 := by linarith
     have an_value (n) : a n = (A n x2 - A n x1) / (x2 - x1) := by
-      field_simp [←mul_sub_left_distrib] ; rfl
+      field_simp
+      simp only [AffineIncrEquiv.apply_eq, a, AffineIncrEquiv.coefs]
+      ring
     have aux : ((A n) x2 - (A n) x1) < (above - below) := by
       linarith only [claim_below n, claim_above n]
     simpa [an_value n] using (div_lt_div_iff_of_pos_right x2x1_positive).mpr aux

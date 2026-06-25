@@ -136,13 +136,13 @@ lemma tendsto_probabilityMeasure_iff_forall_continuousAt_tendsto
 
 noncomputable def equiv_levyProkhorov :
     CumulativeDistributionFunction ≃ LevyProkhorov (ProbabilityMeasure ℝ) :=
-  equiv_probabilityMeasure.trans (LevyProkhorov.equiv (ProbabilityMeasure ℝ)).symm
+  equiv_probabilityMeasure.trans LevyProkhorov.toMeasureEquiv.symm
 
 noncomputable instance : MetricSpace CumulativeDistributionFunction := by
   apply MetricSpace.induced equiv_levyProkhorov
   · intro F G h
     simpa only [EmbeddingLike.apply_eq_iff_eq] using h
-  · exact levyProkhorovDist_metricSpace_probabilityMeasure
+  · exact LevyProkhorov.levyProkhorovDist_metricSpace_probabilityMeasure
 
 noncomputable def homeomorph_levyProkhorov :
     CumulativeDistributionFunction ≃ₜ LevyProkhorov (ProbabilityMeasure ℝ) :=
@@ -150,7 +150,7 @@ noncomputable def homeomorph_levyProkhorov :
 
 noncomputable def homeomorph_probabilityMeasure :
     CumulativeDistributionFunction ≃ₜ ProbabilityMeasure ℝ :=
-  homeomorph_levyProkhorov.trans homeomorph_probabilityMeasure_levyProkhorov.symm
+  homeomorph_levyProkhorov.trans LevyProkhorov.probabilityMeasureHomeomorph.symm
 
 lemma homeomorph_probabilityMeasure_apply_eq (F : CumulativeDistributionFunction) :
     homeomorph_probabilityMeasure F = F.probabilityMeasure :=
@@ -168,9 +168,8 @@ lemma tendsto_iff_forall_continuousAt_tendsto
     apply homeomorph_probabilityMeasure.continuous.continuousAt.tendsto.comp h
   · intro h
     convert homeomorph_probabilityMeasure.symm.continuous.continuousAt.tendsto.comp h
-    · ext1 i
-      exact EquivLike.inv_apply_eq.mp rfl
-    · exact EquivLike.inv_apply_eq.mp rfl
+    · ext1 i; simp [← homeomorph_probabilityMeasure_apply_eq]
+    · simp [← homeomorph_probabilityMeasure_apply_eq]
 
 end CumulativeDistributionFunction
 
