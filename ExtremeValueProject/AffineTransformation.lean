@@ -220,10 +220,10 @@ lemma AffineEquiv.isOrientationPreserving_iff_mono (A : ℝ ≃ᵃ[ℝ] ℝ) :
 /-- The subgroup of affine isomorphishs ℝ → ℝ which are orientation preserving. -/
 noncomputable def orientationPreservingAffineEquiv : Subgroup (ℝ ≃ᵃ[ℝ] ℝ) where
   carrier := AffineEquiv.IsOrientationPreserving
-  mul_mem' := fun ha hb ↦
-    (AffineEquiv.isOrientationPreserving_iff_mono _).mpr
-      (((AffineEquiv.isOrientationPreserving_iff_mono _).mp ha).comp
-       ((AffineEquiv.isOrientationPreserving_iff_mono _).mp hb))
+  mul_mem' := by
+    intro a b ha hb
+    apply (AffineEquiv.isOrientationPreserving_iff_mono _).mpr
+    exact (a.isOrientationPreserving_iff_mono.mp ha).comp (b.isOrientationPreserving_iff_mono.mp hb)
   one_mem' := Real.zero_lt_one
   inv_mem' := by
     intro x hx
@@ -715,13 +715,11 @@ noncomputable abbrev AffineIncrEquiv.extend (A : AffineIncrEquiv) : EReal ≃ ER
 
 @[simp] lemma AffineIncrEquiv.extend_bot (A : AffineIncrEquiv) :
     A.extend ⊥ = ⊥ := by
-  have h : 0 < A.val.toAffineMap.coefs_of_field.1 := A.isOrientationPreserving
-  simp [AffineIncrEquiv.extend, AffineEquiv.extend_bot, h]
+  simp [show 0 < A.val.toAffineMap.coefs_of_field.1 from A.isOrientationPreserving]
 
 @[simp] lemma AffineIncrEquiv.extend_top (A : AffineIncrEquiv) :
     A.extend ⊤ = ⊤ := by
-  have h : 0 < A.val.toAffineMap.coefs_of_field.1 := A.isOrientationPreserving
-  simp [AffineIncrEquiv.extend, AffineEquiv.extend_top, h]
+  simp [show 0 < A.val.toAffineMap.coefs_of_field.1 from A.isOrientationPreserving]
 
 @[simp] lemma AffineIncrEquiv.extend_ofReal (A : AffineIncrEquiv) (x : ℝ) :
     A.extend x = A x :=

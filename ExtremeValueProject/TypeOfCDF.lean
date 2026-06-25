@@ -250,8 +250,7 @@ lemma not_tendsto_cdf_of_expanding_of_tendsto_not_isDegenerate
     intro n
     have x2x1_positive : 0 < x2 - x1 := by linarith
     have an_value (n) : a n = (A n x2 - A n x1) / (x2 - x1) := by
-      have hne : x2 - x1 ≠ 0 := ne_of_gt x2x1_positive
-      rw [eq_div_iff hne]
+      field_simp
       simp only [AffineIncrEquiv.apply_eq, a, AffineIncrEquiv.coefs]
       ring
     have aux : ((A n) x2 - (A n) x1) < (above - below) := by

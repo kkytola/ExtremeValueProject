@@ -94,8 +94,6 @@ lemma sub_smul_deriv_isLittleO_of_tendsto_atTop_of_tendsto_smul_apply {ι : Type
     (fun i ↦ f (a i) - a i • D) =o[L] a := by
   have a_lim : Tendsto a L (𝓝 0) :=
     tendsto_zero_of_tendsto_atTop_of_tendsto_smul f hs m_to_infty a_in_s ha
-
-
   have hDf' : (fun x' => f x' - x' • D) =o[𝓝 0] (fun x' => x') := by
     simpa only [hf, sub_zero] using hDf.isLittleO
   rw [isLittleO_iff] at hDf' ⊢

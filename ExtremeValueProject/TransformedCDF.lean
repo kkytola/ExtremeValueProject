@@ -121,8 +121,7 @@ lemma extend_apply_eq_map_measure_Iic (F : CumulativeDistributionFunction) (x : 
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
     convert show 0 = F.measure ∅ by simp
     · simp
-    · ext x
-      simp
+    · ext x ; simp
   | ⊤ =>
     rw [Measure.map_apply measurable_coe_real_ereal measurableSet_Iic]
     simp
