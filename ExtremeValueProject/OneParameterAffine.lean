@@ -252,12 +252,140 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   exact ⟨Ioo (-δ) δ, Ioo_mem_nhds (by linarith) δ_pos, hδ⟩
 
+
+namespace RealAdditive
+
+-- TODO given f_add and of_zero, results could follow directly
+-- from this being an additive homeomorphism
+
+lemma of_zero
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) :
+      f 0 = 0 := by
+  suffices h : f 0 + f 0 = f 0 from by
+    simpa [Eq.symm] using congrArg (fun x ↦ x - f 0) h
+  rw [← f_add 0 0, zero_add 0]
+
+lemma of_neg
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    (x : ℝ) : f (- x) = - f x := by
+  apply add_left_cancel (a := f x)
+  simp [← f_add x (-x), of_zero f_add]
+
+lemma of_sub
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) :
+      ∀ t₁ t₂, f (t₁ - t₂) = f t₁ - f t₂ := by
+  intro t₁ t₂
+  rw [sub_eq_add_neg, f_add, of_neg f_add, ← sub_eq_add_neg]
+
+lemma of_nat
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
+  induction n with
+  | zero => simpa using of_zero f_add
+  | succ n ih => simp [right_distrib, f_add, ih]
+
+lemma of_int
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
+  cases z with
+  | ofNat n => simp [of_nat f_add n]
+  | negSucc n => simp [right_distrib, f_add, of_neg f_add, of_nat f_add]
+
+lemma of_inv_nat
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) (n : ℕ)
+    (n_ne_zero : n ≠ 0) (x : ℝ) : f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
+  rify at n_ne_zero
+  apply mul_left_cancel₀ n_ne_zero
+  rw [← of_nat f_add]
+  field_simp
+
+lemma of_rat
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
+  rw [← Rat.num_div_den q]
+  push_cast
+  calc f (q.num / q.den * x)
+    _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
+    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := of_int f_add q.num ((q.den : ℝ)⁻¹ * x)
+    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [of_inv_nat f_add q.den q.den_nz x]
+    _ = q.num / q.den * f x := by field_simp
+
+end RealAdditive
+
+open Filter Topology
+
 lemma linear_of_additive_of_le_on_measure_pos
     {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) (x : ℝ) :
     f x = (f 1) * x := by
-  sorry
+  suffices h : |f x - x * f 1| = 0 by simpa [sub_eq_zero, mul_comm x (f 1)] using h
+  rcases exists_nhd_abs_le_of_additive_of_le_on_measure_pos f_add A_mble
+                                                            A_pos f_bdd_on_A
+    with ⟨B, B_in_nhds_0, c, f_bdd_on_B⟩
+  rcases mem_nhds_iff_exists_Ioo_subset.mp B_in_nhds_0
+    with ⟨a, b, ⟨zero_in_Ioo, Ioo_subset_B⟩⟩
+  obtain ⟨a_neg, b_pos⟩ := Set.mem_Ioo.mp zero_in_Ioo
+  let δ := min |a| |b|
+  have δ_pos : 0 < δ := lt_min (abs_pos_of_neg a_neg) (abs_pos_of_pos b_pos)
+  have f_bdd_within
+      {x : ℝ} (n : ℕ) (n_ne_zero : n ≠ 0) (x_in_Ioo : |x| < δ / n) :
+        |f x| ≤ c / n := by
+    have n_pos : (0 : ℝ ) < (n : ℝ) :=
+      Nat.cast_pos'.mpr (Nat.zero_lt_of_ne_zero n_ne_zero)
+    suffices h : |n * f x| ≤ c by simpa [le_div_iff₀' n_pos] using h
+    have x_in_Ioo : |n * x| < δ := by simpa using (lt_div_iff₀' n_pos).mp x_in_Ioo
+    have x_in_Ioo : n * x ∈ Ioo a b := by
+      have l : -δ < n * x := by exact neg_lt_of_abs_lt x_in_Ioo
+      have r : n * x < δ := by exact lt_of_abs_lt x_in_Ioo
+      have nx_δ_Ioo : n * x ∈ Ioo (-δ) δ := Set.mem_Ioo.mpr ⟨l, r⟩
+      have sub_Ioo : Ioo (-δ) δ ⊆ Ioo a b := by
+        -- TODO This subproof is too massive
+        apply Set.Ioo_subset_Ioo
+        · rw [← neg_neg a]
+          apply neg_le_neg
+          have : δ ≤ |a| := Std.min_le_left
+          simpa [abs_of_neg a_neg] using this
+        · have : δ ≤ |b| := Std.min_le_right
+          simpa [abs_of_pos b_pos] using this
+      exact mem_Ioo.mpr (sub_Ioo nx_δ_Ioo)
+    rw [← RealAdditive.of_nat f_add n x]
+    exact f_bdd_on_B (n * x) (Ioo_subset_B x_in_Ioo)
+  have hh (n : ℕ) (n_pos : 0 < n) : ∃ q : ℚ, |x - q| < δ / n := by
+    rify at n_pos
+    exact exists_rat_near x (div_pos δ_pos n_pos)
+  have ub  : ∀ᶠ (n : ℕ) in atTop, |f x - x * f 1| ≤ (c + δ * |f 1|) / n := by
+    filter_upwards [Ioi_mem_atTop 0] with n hn
+    have n_pos : 0 < n := Set.mem_Ioi.mp hn
+    have n_ne_zero : n ≠ 0 := by exact Nat.ne_zero_of_lt hn
+    rcases hh n n_pos with ⟨q, hq⟩
+    have hq_symm : |q - x| < δ / n := by
+        rw [abs_sub_comm]
+        exact hq
+    calc |f x - x * f 1|
+      _ = |f (x - q) + q * f 1 - x * f 1| := by
+        simp [RealAdditive.of_sub f_add, ← RealAdditive.of_rat f_add]
+      _ = |f (x - q) + (q - x) * f 1| := by group
+      _ ≤ |f (x - q)| + |(q - x) * f 1| := by apply abs_add_le
+      _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by rw [abs_mul]
+      _ ≤ c / n + |(q - x)| * |f 1| :=
+        add_le_add_left (f_bdd_within n n_ne_zero hq) (|q - x| * |f 1|)
+      _ ≤ c / n + (δ / n) * |f 1| := by
+        by_cases h_zero : 0 = |f 1|
+        · simp [← h_zero]
+        · have h_zero : 0 < |f 1| := lt_of_le_of_ne (abs_nonneg (f 1)) h_zero
+          suffices h : |q - x| * |f 1| < (δ / ↑n) * |f 1| by linarith
+          exact (mul_lt_mul_iff_left₀ h_zero).mpr hq_symm
+      _ = (c + δ * |f 1|) / n := by field_simp
+  have tendsto_zero : Filter.Tendsto (fun n : ℕ ↦ |f x - x * f 1|) atTop (𝓝 0) :=
+    have lb : ∀ᶠ n : ℕ in atTop, 0 ≤ |f x - x * f 1| := by
+      filter_upwards [Ioi_mem_atTop 0] with _ _
+      exact abs_nonneg (f x - x * f 1)
+    have ub_tendsto_zero :
+        Filter.Tendsto (fun n : ℕ ↦ (c + δ * |f 1|) * (n : ℝ)⁻¹) atTop (𝓝 0) :=
+      tendsto_const_div_atTop_nhds_zero_nat (c + δ * |f 1|)
+    squeeze_zero' lb ub ub_tendsto_zero
+  exact tendsto_const_nhds_iff.mp tendsto_zero
 
 open ENNReal in
 lemma linear_of_additive_of_measurable
