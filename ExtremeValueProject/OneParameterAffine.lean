@@ -239,7 +239,23 @@ lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) :
     ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, |f x| ≤ c := by
-  sorry
+  obtain ⟨x₁, x₂, x₁_lt_x₂, h_Ioo⟩ := exists_Ioo_subset_add_of_measure_pos A_mble A_pos
+  let y := (x₁ + x₂) / 2
+  let δ := (x₂ - x₁) / 2
+  use δ; constructor; positivity
+  use 2*M + |f y|
+  intro t abs_t_lt_δ
+  obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
+  beta_reduce at h_add_y_t
+  have f_bdd_on_A : ∀ a ∈ A, |f a| ≤ M := sorry -- requires RealAdditive.map_neg
+  calc
+        |f t|
+    _ = |f (a + b - y)| := by rw [(by linarith : t = a + b - y)]
+    _ = |f a + f b - f y| := sorry -- RealAdditive lemmas solve this
+    _ ≤ |f a| + |f b| + |f y| := by grw [abs_sub (f a + f b) (f y),
+                                         abs_add_le (f a) (f b)]
+    _ ≤ 2*M + |f y| := by
+      grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
 
 open Topology in
 lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
