@@ -254,59 +254,45 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
 
 namespace RealAdditive
 
--- TODO given f_add and of_zero, results could follow directly
--- from this being an additive homeomorphism
+variable {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+include f f_add
 
-lemma of_zero
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) :
-      f 0 = 0 := by
-  suffices h : f 0 + f 0 = f 0 from by
-    simpa [Eq.symm] using congrArg (fun x ↦ x - f 0) h
-  rw [← f_add 0 0, zero_add 0]
+lemma map_zero : f 0 = 0 := by
+  suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
+  simp [← f_add 0 0]
 
-lemma of_neg
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
-    (x : ℝ) : f (- x) = - f x := by
-  apply add_left_cancel (a := f x)
-  simp [← f_add x (-x), of_zero f_add]
+def homeomorphism : ℝ →+ ℝ where
+  toFun := f
+  map_zero' := map_zero f_add
+  map_add' := f_add
 
-lemma of_sub
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) :
-      ∀ t₁ t₂, f (t₁ - t₂) = f t₁ - f t₂ := by
-  intro t₁ t₂
-  rw [sub_eq_add_neg, f_add, of_neg f_add, ← sub_eq_add_neg]
+lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homeomorphism f_add) x
 
-lemma of_nat
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
-    (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
-  induction n with
-  | zero => simpa using of_zero f_add
-  | succ n ih => simp [right_distrib, f_add, ih]
+lemma map_sub' (t₁ t₂ : ℝ) : f (t₁ - t₂) = f t₁ - f t₂ :=
+  map_sub (homeomorphism f_add) t₁ t₂
 
-lemma of_int
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
-    (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
-  cases z with
-  | ofNat n => simp [of_nat f_add n]
-  | negSucc n => simp [right_distrib, f_add, of_neg f_add, of_nat f_add]
+lemma map_nmul (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
+  repeat rw [← nsmul_eq_mul]
+  exact map_nsmul (homeomorphism f_add) n x
 
-lemma of_inv_nat
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂) (n : ℕ)
-    (n_ne_zero : n ≠ 0) (x : ℝ) : f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
+lemma map_zmul (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
+  repeat rw [← zsmul_eq_mul]
+  exact map_zsmul (homeomorphism f_add) z x
+
+lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
+    f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
   rify at n_ne_zero
   apply mul_left_cancel₀ n_ne_zero
-  rw [← of_nat f_add]
+  rw [← map_nmul f_add]
   field_simp
 
-lemma of_rat
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
-    (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
+lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
   rw [← Rat.num_div_den q]
   push_cast
   calc f (q.num / q.den * x)
     _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
-    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := of_int f_add q.num ((q.den : ℝ)⁻¹ * x)
-    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [of_inv_nat f_add q.den q.den_nz x]
+    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
+    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [map_inv_nat f_add q.den q.den_nz x]
     _ = q.num / q.den * f x := by field_simp
 
 end RealAdditive
@@ -348,7 +334,7 @@ lemma linear_of_additive_of_le_on_measure_pos
         · have : δ ≤ |b| := Std.min_le_right
           simpa [abs_of_pos b_pos] using this
       exact mem_Ioo.mpr (sub_Ioo nx_δ_Ioo)
-    rw [← RealAdditive.of_nat f_add n x]
+    rw [← RealAdditive.map_nmul f_add n x]
     exact f_bdd_on_B (n * x) (Ioo_subset_B x_in_Ioo)
   have hh (n : ℕ) (n_pos : 0 < n) : ∃ q : ℚ, |x - q| < δ / n := by
     rify at n_pos
@@ -363,7 +349,7 @@ lemma linear_of_additive_of_le_on_measure_pos
         exact hq
     calc |f x - x * f 1|
       _ = |f (x - q) + q * f 1 - x * f 1| := by
-        simp [RealAdditive.of_sub f_add, ← RealAdditive.of_rat f_add]
+        simp [RealAdditive.map_sub' f_add, ← RealAdditive.map_rat f_add]
       _ = |f (x - q) + (q - x) * f 1| := by group
       _ ≤ |f (x - q)| + |(q - x) * f 1| := by apply abs_add_le
       _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by rw [abs_mul]
