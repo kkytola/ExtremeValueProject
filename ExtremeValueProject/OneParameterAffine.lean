@@ -326,14 +326,9 @@ lemma linear_of_additive_of_le_on_measure_pos
       have r : n * x < δ := by exact lt_of_abs_lt x_in_Ioo
       have nx_δ_Ioo : n * x ∈ Ioo (-δ) δ := Set.mem_Ioo.mpr ⟨l, r⟩
       have sub_Ioo : Ioo (-δ) δ ⊆ Ioo a b := by
-        -- TODO This subproof is too massive
         apply Set.Ioo_subset_Ioo
-        · rw [← neg_neg a]
-          apply neg_le_neg
-          have : δ ≤ |a| := Std.min_le_left
-          simpa [abs_of_neg a_neg] using this
-        · have : δ ≤ |b| := Std.min_le_right
-          simpa [abs_of_pos b_pos] using this
+        · grw [le_neg, ← abs_of_neg a_neg, ← min_le_left |a| |b|]
+        · grw [← abs_of_pos b_pos, ← min_le_right |a| |b|]
       exact mem_Ioo.mpr (sub_Ioo nx_δ_Ioo)
     rw [← RealAdditive.map_nmul f_add n x]
     exact f_bdd_on_B (n * x) (Ioo_subset_B x_in_Ioo)
@@ -352,8 +347,7 @@ lemma linear_of_additive_of_le_on_measure_pos
       _ = |f (x - q) + q * f 1 - x * f 1| := by
         simp [RealAdditive.map_sub' f_add, ← RealAdditive.map_rat f_add]
       _ = |f (x - q) + (q - x) * f 1| := by group
-      _ ≤ |f (x - q)| + |(q - x) * f 1| := by apply abs_add_le
-      _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by rw [abs_mul]
+      _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by grw [abs_add_le, abs_mul]
       _ ≤ c / n + |(q - x)| * |f 1| :=
         add_le_add_left (f_bdd_within n n_ne_zero hq) (|q - x| * |f 1|)
       _ ≤ c / n + (δ / n) * |f 1| := by
