@@ -151,6 +151,7 @@ lemma IsOpen.countable_setOf_connectedComponentIn
   let ψ : {C : Set α | ∃ x ∈ s, C = connectedComponentIn s x} → ConnectedComponents s :=
     fun C ↦ ConnectedComponents.mk
             ⟨(mem_setOf_eq.mp C.prop).choose, (mem_setOf_eq.mp C.prop).choose_spec.1⟩
+
   have ψ_inj : Function.Injective ψ := by
     intro C₁ C₂ hψC
     ext1
@@ -267,12 +268,120 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   exact ⟨Ioo (-δ) δ, Ioo_mem_nhds (by linarith) δ_pos, hδ⟩
 
+
+namespace RealAdditive
+
+variable {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+include f f_add
+
+lemma map_zero : f 0 = 0 := by
+  suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
+  simp [← f_add 0 0]
+
+def homeomorphism : ℝ →+ ℝ where
+  toFun := f
+  map_zero' := map_zero f_add
+  map_add' := f_add
+
+lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homeomorphism f_add) x
+
+lemma map_sub' (t₁ t₂ : ℝ) : f (t₁ - t₂) = f t₁ - f t₂ :=
+  map_sub (homeomorphism f_add) t₁ t₂
+
+lemma map_nmul (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
+  repeat rw [← nsmul_eq_mul]
+  exact map_nsmul (homeomorphism f_add) n x
+
+lemma map_zmul (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
+  repeat rw [← zsmul_eq_mul]
+  exact map_zsmul (homeomorphism f_add) z x
+
+lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
+    f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
+  rify at n_ne_zero
+  apply mul_left_cancel₀ n_ne_zero
+  rw [← map_nmul f_add]
+  field_simp
+
+lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
+  rw [← Rat.num_div_den q]
+  push_cast
+  calc f (q.num / q.den * x)
+    _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
+    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
+    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [map_inv_nat f_add q.den q.den_nz x]
+    _ = q.num / q.den * f x := by field_simp
+
+end RealAdditive
+
+open Filter Topology
+
 lemma linear_of_additive_of_le_on_measure_pos
     {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) (x : ℝ) :
     f x = (f 1) * x := by
-  sorry
+  suffices h : |f x - x * f 1| = 0 by simpa [sub_eq_zero, mul_comm x (f 1)] using h
+  rcases exists_nhd_abs_le_of_additive_of_le_on_measure_pos f_add A_mble
+                                                            A_pos f_bdd_on_A
+    with ⟨B, B_in_nhds_0, c, f_bdd_on_B⟩
+  rcases mem_nhds_iff_exists_Ioo_subset.mp B_in_nhds_0
+    with ⟨a, b, ⟨zero_in_Ioo, Ioo_subset_B⟩⟩
+  obtain ⟨a_neg, b_pos⟩ := Set.mem_Ioo.mp zero_in_Ioo
+  let δ := min |a| |b|
+  have δ_pos : 0 < δ := lt_min (abs_pos_of_neg a_neg) (abs_pos_of_pos b_pos)
+  have f_bdd_within
+      {x : ℝ} (n : ℕ) (n_ne_zero : n ≠ 0) (x_in_Ioo : |x| < δ / n) :
+        |f x| ≤ c / n := by
+    have n_pos : (0 : ℝ ) < (n : ℝ) :=
+      Nat.cast_pos'.mpr (Nat.zero_lt_of_ne_zero n_ne_zero)
+    suffices h : |n * f x| ≤ c by simpa [le_div_iff₀' n_pos] using h
+    have x_in_Ioo : |n * x| < δ := by simpa using (lt_div_iff₀' n_pos).mp x_in_Ioo
+    have x_in_Ioo : n * x ∈ Ioo a b := by
+      have l : -δ < n * x := by exact neg_lt_of_abs_lt x_in_Ioo
+      have r : n * x < δ := by exact lt_of_abs_lt x_in_Ioo
+      have nx_δ_Ioo : n * x ∈ Ioo (-δ) δ := Set.mem_Ioo.mpr ⟨l, r⟩
+      have sub_Ioo : Ioo (-δ) δ ⊆ Ioo a b := by
+        apply Set.Ioo_subset_Ioo
+        · grw [le_neg, ← abs_of_neg a_neg, ← min_le_left |a| |b|]
+        · grw [← abs_of_pos b_pos, ← min_le_right |a| |b|]
+      exact mem_Ioo.mpr (sub_Ioo nx_δ_Ioo)
+    rw [← RealAdditive.map_nmul f_add n x]
+    exact f_bdd_on_B (n * x) (Ioo_subset_B x_in_Ioo)
+  have hh (n : ℕ) (n_pos : 0 < n) : ∃ q : ℚ, |x - q| < δ / n := by
+    rify at n_pos
+    exact exists_rat_near x (div_pos δ_pos n_pos)
+  have ub  : ∀ᶠ (n : ℕ) in atTop, |f x - x * f 1| ≤ (c + δ * |f 1|) / n := by
+    filter_upwards [Ioi_mem_atTop 0] with n hn
+    have n_pos : 0 < n := Set.mem_Ioi.mp hn
+    have n_ne_zero : n ≠ 0 := by exact Nat.ne_zero_of_lt hn
+    rcases hh n n_pos with ⟨q, hq⟩
+    have hq_symm : |q - x| < δ / n := by
+        rw [abs_sub_comm]
+        exact hq
+    calc |f x - x * f 1|
+      _ = |f (x - q) + q * f 1 - x * f 1| := by
+        simp [RealAdditive.map_sub' f_add, ← RealAdditive.map_rat f_add]
+      _ = |f (x - q) + (q - x) * f 1| := by group
+      _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by grw [abs_add_le, abs_mul]
+      _ ≤ c / n + |(q - x)| * |f 1| :=
+        add_le_add_left (f_bdd_within n n_ne_zero hq) (|q - x| * |f 1|)
+      _ ≤ c / n + (δ / n) * |f 1| := by
+        by_cases h_zero : 0 = |f 1|
+        · simp [← h_zero]
+        · have h_zero : 0 < |f 1| := lt_of_le_of_ne (abs_nonneg (f 1)) h_zero
+          suffices h : |q - x| * |f 1| < (δ / ↑n) * |f 1| by linarith
+          exact (mul_lt_mul_iff_left₀ h_zero).mpr hq_symm
+      _ = (c + δ * |f 1|) / n := by field_simp
+  have tendsto_zero : Filter.Tendsto (fun n : ℕ ↦ |f x - x * f 1|) atTop (𝓝 0) :=
+    have lb : ∀ᶠ n : ℕ in atTop, 0 ≤ |f x - x * f 1| := by
+      filter_upwards [Ioi_mem_atTop 0] with _ _
+      exact abs_nonneg (f x - x * f 1)
+    have ub_tendsto_zero :
+        Filter.Tendsto (fun n : ℕ ↦ (c + δ * |f 1|) * (n : ℝ)⁻¹) atTop (𝓝 0) :=
+      tendsto_const_div_atTop_nhds_zero_nat (c + δ * |f 1|)
+    squeeze_zero' lb ub ub_tendsto_zero
+  exact tendsto_const_nhds_iff.mp tendsto_zero
 
 open ENNReal in
 lemma linear_of_additive_of_measurable
@@ -321,7 +430,7 @@ section one_parameter_subgroups_of_affine_transformations
 (`β` is a real parameter: each `β` gives a different (but related) homomorphism) -/
 noncomputable def AffineIncrEquiv.homOfIndex₀ (β : ℝ) :
     MonoidHom (Multiplicative ℝ) AffineIncrEquiv where
-  toFun s := .mkOfCoefs zero_lt_one (s.toAdd * β)
+  toFun s := .mkOfCoefs zero_lt_one (β * s.toAdd)
   map_one' := by ext x ; simp
   map_mul' s₁ s₂ := by
     ext x
@@ -333,12 +442,12 @@ noncomputable def AffineIncrEquiv.homOfIndex₀ (β : ℝ) :
 (`α c` are real parameters: each `α c` give a different homomorphism) -/
 noncomputable def AffineIncrEquiv.homOfIndex (α c : ℝ) :
     MonoidHom (Multiplicative ℝ) AffineIncrEquiv where
-  toFun s := .mkOfCoefs (show 0 < Real.exp (s.toAdd * α) from Real.exp_pos _)
-              (c * (1 - Real.exp (s.toAdd * α)))
+  toFun s := .mkOfCoefs (show 0 < Real.exp (α * s.toAdd) from Real.exp_pos _)
+              (c * (1 - Real.exp (α * s.toAdd)))
   map_one' := by ext x ; simp
   map_mul' s₁ s₂ := by
     ext x
-    simp [add_mul, Real.exp_add]
+    simp [mul_add, Real.exp_add]
     ring
 
 @[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_fst {β s : ℝ} :
@@ -346,17 +455,17 @@ noncomputable def AffineIncrEquiv.homOfIndex (α c : ℝ) :
   simp [homOfIndex₀, MonoidHom.coe_mk, OneHom.coe_mk, coefs_fst_mkOfCoefs]
 
 @[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_snd {β s : ℝ} :
-    (homOfIndex₀ β s).coefs.2 = s * β := by
+    (homOfIndex₀ β s).coefs.2 = β * s := by
   simp only [homOfIndex₀, MonoidHom.coe_mk, OneHom.coe_mk, coefs_snd_mkOfCoefs]
   congr
 
 @[simp] lemma AffineIncrEquiv.homOfIndex_coefs_fst {α c s : ℝ} :
-    (homOfIndex α c s).coefs.1 = Real.exp (s * α) := by
+    (homOfIndex α c s).coefs.1 = Real.exp (α * s) := by
   simp only [homOfIndex, MonoidHom.coe_mk, OneHom.coe_mk, coefs_fst_mkOfCoefs, Real.exp_eq_exp]
   congr
 
 @[simp] lemma AffineIncrEquiv.homOfIndex_coefs_snd {α c s : ℝ} :
-    (homOfIndex α c s).coefs.2 = c * (1 - Real.exp (s * α)) := by
+    (homOfIndex α c s).coefs.2 = c * (1 - Real.exp (α * s)) := by
   simp only [homOfIndex, MonoidHom.coe_mk, OneHom.coe_mk, coefs_snd_mkOfCoefs]
   congr
 
@@ -399,6 +508,12 @@ lemma AffineIncrEquiv.conjugate_homOfIndex₀ (A : AffineIncrEquiv) (β : ℝ) (
     A * homOfIndex₀ β s * A⁻¹ = homOfIndex₀ (β * A.coefs.1) s := by
   sorry -- **Issue #46**
 
+lemma AffineIncrEquiv.homOfIndex_zero_ext_of_coefs
+    {A₁ : AffineIncrEquiv} {t β : ℝ} (h : A₁.coefs = ((homOfIndex₀ β) t).coefs) :
+    A₁ = (homOfIndex₀ β) t := by
+  ext x
+  simp [h]
+
 @[simp] lemma AffineIncrEquiv.homOfIndex_zero' (α c : ℝ) :
     homOfIndex α c (.ofAdd 0) = 1 :=
   map_one ..
@@ -430,7 +545,7 @@ lemma AffineIncrEquiv.homOfIndex_add (α c : ℝ) (s₁ s₂ : ℝ) :
   simp only [homOfIndex_add, mul_apply_eq_comp_apply]
 
 lemma AffineIncrEquiv.homOfIndex_eq_homOfIndex_one_mul {α c s : ℝ} :
-    homOfIndex α c s = homOfIndex 1 c (s * α) := by
+    homOfIndex α c s = homOfIndex 1 c (α * s) := by
   ext x
   simp
 
@@ -563,11 +678,109 @@ lemma measurable_toMultiplicative :
     Measurable (fun (s : ℝ) ↦ Multiplicative.ofAdd s) :=
   continuous_ofAdd.measurable
 
+noncomputable def AffineIncrEquiv.hom_coef_fst
+    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) :=
+  fun s ↦ (f s).coefs.1
+
+noncomputable def AffineIncrEquiv.hom_coef_snd
+    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) :=
+  fun s ↦ (f s).coefs.2
+
+lemma AffineIncrEquiv.hom_ext
+    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv)
+    (g : MonoidHom (Multiplicative ℝ) AffineIncrEquiv)
+    (fst_coefs_eq : hom_coef_fst f = hom_coef_fst g)
+    (snd_coefs_eq : hom_coef_snd f = hom_coef_snd g) : f = g := by
+  ext s x; simp
+  change hom_coef_fst f s * x + hom_coef_snd f s
+       = hom_coef_fst g s * x + hom_coef_snd g s
+  rw [fst_coefs_eq, snd_coefs_eq]
+
+lemma AffineIncrEquiv.homOfIndex_iff_ext
+    {α c : ℝ}
+    {f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv}
+    (coef_1_eq : hom_coef_fst f = λ s : ℝ ↦ Real.exp (α * s))
+    (coef_2_eq : hom_coef_snd f = λ s : ℝ ↦ c * (1 - Real.exp (α * s))) :
+      f = AffineIncrEquiv.homOfIndex α c := by
+  apply AffineIncrEquiv.hom_ext
+  · rw [coef_1_eq]
+    unfold hom_coef_fst
+    simp; rfl
+  · rw [coef_2_eq]
+    unfold hom_coef_snd
+    simp; rfl
+
+lemma AffineIncrEquiv.homOfIndex₀_iff_ext
+    {β : ℝ} {f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv}
+    (coef_1_one : hom_coef_fst f = 1)
+    (coef_2_eq_t_β : hom_coef_snd f = fun s ↦ β * s) :
+      f = homOfIndex₀ β := by
+  apply AffineIncrEquiv.hom_ext
+  · rw [coef_1_one]
+    unfold hom_coef_fst
+    simp; rfl
+  · rw [coef_2_eq_t_β]
+    unfold hom_coef_snd
+    ext s
+    simp
+
 /-- Characterization of homomorphisms `f : ℝ → AffineIncrEquiv`. -/
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (f_mble : Measurable f) :
     (∃ β, f = homOfIndex₀ β) ∨ (∃ α c, f = homOfIndex α c) := by
-  sorry -- TODO: Create issue.
+  let a₀ : AffineIncrEquiv → ℝ := fun A ↦ A.coefs.1
+  let b₀ : AffineIncrEquiv → ℝ := fun A ↦ A.coefs.2
+  let a : ℝ → ℝ := a₀ ∘ f
+  let b : ℝ → ℝ := b₀ ∘ f
+  have a_pos (s : ℝ) : 0 < a s := (f s).coefs_fst_pos
+  have a_hom (s t : ℝ) : a (s + t) = a s * a t :=
+    AffineIncrEquiv.homomorphism_coef_eqn_fst f s t
+  have b_hom (s t : ℝ) : b (s + t) = a s * b t + b s :=
+    AffineIncrEquiv.homomorphism_coef_eqn_snd f s t
+  have a_mble : Measurable a :=
+    Measurable.comp AffineIncrEquiv.measurable_coefs_fst f_mble
+  have b_mble : Measurable b :=
+    Measurable.comp AffineIncrEquiv.measurable_coefs_snd f_mble
+  have b_zero : b 0 = 0 := by
+    rw [show b 0 = b₀ (f (0 : ℝ)) from rfl, show f (0 : ℝ) = 1 from map_one f]
+    exact AffineIncrEquiv.coefs_snd_one
+  obtain ⟨α, a_eq_exp_α_s⟩ :=
+    @eq_exp_const_mul_of_multiplicative_of_measurable a a_pos a_hom a_mble
+  by_cases α_zero : α = 0
+  · left
+    have a_eq_one : a = 1 := by
+      rw [a_eq_exp_α_s, α_zero]
+      ext t
+      simp
+    have b_hom' (s t : ℝ) : b (s + t) = b s + b t := by
+      simpa [a_eq_exp_α_s, α_zero, add_comm t s] using b_hom t s
+    obtain ⟨β, b_eq_β_mul_s⟩ :=
+      @eq_const_mul_of_additive_of_measurable b b_hom' b_mble
+    use β
+    exact AffineIncrEquiv.homOfIndex₀_iff_ext a_eq_one b_eq_β_mul_s
+  · right
+    have refactored (s t : ℝ) :
+        (rexp (α * s) - 1) * b t = (rexp (α * t) - 1) * b s := by
+      calc (rexp (α * s) - 1) * b t
+      _ = rexp (α * s) * b t + b s - b t - b s := by ring
+      _ = b (s + t) - b t - b s := by rw [b_hom, a_eq_exp_α_s]
+      _ = b (t + s) - b t - b s := by rw [add_comm s t]
+      _ = rexp (α * t) * b s + b t - b t - b s := by rw [b_hom, a_eq_exp_α_s]
+      _ = (rexp (α * t) - 1) * b s := by ring
+    let c := - (b 1 / (rexp (α * 1) - 1))
+    have b_eq_c_mul_exp : b = λ t ↦ c * (1 - rexp (α * t)) := by
+      ext t
+      by_cases t_zero : t = 0
+      · rw [t_zero, b_zero, mul_zero,
+            show rexp 0 = 1 from (Real.exp_eq_one_iff 0).mpr (Eq.refl 0),
+            sub_self, mul_zero]
+      · have term := congrArg (λ x ↦ x / (rexp (α * 1) - 1)) (refactored 1 t)
+        have : (rexp (α * 1) - 1) ≠ 0 := by
+          simp [sub_eq_zero, α_zero]
+        rw [mul_comm, mul_div_assoc, div_self this, mul_one] at term
+        rw [term]
+        ring
+    exact ⟨α, c, AffineIncrEquiv.homOfIndex_iff_ext a_eq_exp_α_s b_eq_c_mul_exp⟩
 
 /-- Characterization of nontrivial homomorphisms `f : ℝ → AffineIncrEquiv`. -/
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization_of_nontrivial
