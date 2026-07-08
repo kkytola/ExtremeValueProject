@@ -10,6 +10,51 @@ section cauchy_hamel_functional_equation
 
 open Real Set Pointwise MeasureTheory
 
+namespace RealAdditive
+
+variable {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+include f f_add
+
+lemma map_zero : f 0 = 0 := by
+  suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
+  simp [← f_add 0 0]
+
+def homeomorphism : ℝ →+ ℝ where
+  toFun := f
+  map_zero' := map_zero f_add
+  map_add' := f_add
+
+lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homeomorphism f_add) x
+
+lemma map_sub' (t₁ t₂ : ℝ) : f (t₁ - t₂) = f t₁ - f t₂ :=
+  map_sub (homeomorphism f_add) t₁ t₂
+
+lemma map_nmul (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
+  repeat rw [← nsmul_eq_mul]
+  exact map_nsmul (homeomorphism f_add) n x
+
+lemma map_zmul (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
+  repeat rw [← zsmul_eq_mul]
+  exact map_zsmul (homeomorphism f_add) z x
+
+lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
+    f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
+  rify at n_ne_zero
+  apply mul_left_cancel₀ n_ne_zero
+  rw [← map_nmul f_add]
+  field_simp
+
+lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
+  rw [← Rat.num_div_den q]
+  push_cast
+  calc f (q.num / q.den * x)
+    _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
+    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
+    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [map_inv_nat f_add q.den q.den_nz x]
+    _ = q.num / q.den * f x := by field_simp
+
+end RealAdditive
+
 lemma eq_iUnion_connectedComponentIn (U : Set ℝ) :
     U = ⋃ x ∈ U, connectedComponentIn U x := by
   apply subset_antisymm
@@ -244,19 +289,28 @@ lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
   let y := (x₁ + x₂) / 2
   let δ := (x₂ - x₁) / 2
   use δ; constructor; positivity
-  use 2*M + |f y|
+  use 2*M - f y
+  have pos : ∀ t ∈ Ioo (-δ) δ, f t ≤ 2 * M - f y := by
+    intro t abs_t_lt_δ
+    obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
+    calc
+          f t
+      _ = f (a + b - y) := by rw [(by linarith : t = a + b - y)]
+      _ = f a + f b - f y := by rw [RealAdditive.map_sub' f_add, f_add]
+      _ ≤ 2*M - f y := by
+        grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
+  have neg : ∀ t ∈ Ioo (-δ) δ, - (2 * M - f y) ≤ f t := by
+    intro t abs_t_lt_δ
+    have : f (-t) ≤ 2 * M - f y :=
+      pos (-t) (by simpa only [neg_mem_Ioo_iff, neg_neg] using abs_t_lt_δ)
+    calc
+          - (2 * M - f y)
+      _ ≤ - f (-t) := by linarith
+      _ = f t := by simp [RealAdditive.map_neg' f_add]
   intro t abs_t_lt_δ
-  obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
-  beta_reduce at h_add_y_t
-  have f_bdd_on_A : ∀ a ∈ A, |f a| ≤ M := sorry -- requires RealAdditive.map_neg
-  calc
-        |f t|
-    _ = |f (a + b - y)| := by rw [(by linarith : t = a + b - y)]
-    _ = |f a + f b - f y| := sorry -- RealAdditive lemmas solve this
-    _ ≤ |f a| + |f b| + |f y| := by grw [abs_sub (f a + f b) (f y),
-                                         abs_add_le (f a) (f b)]
-    _ ≤ 2*M + |f y| := by
-      grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
+  apply abs_le.mpr; constructor
+  · simpa using neg t abs_t_lt_δ
+  · exact pos t abs_t_lt_δ
 
 open Topology in
 lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
@@ -268,51 +322,6 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   exact ⟨Ioo (-δ) δ, Ioo_mem_nhds (by linarith) δ_pos, hδ⟩
 
-
-namespace RealAdditive
-
-variable {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
-include f f_add
-
-lemma map_zero : f 0 = 0 := by
-  suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
-  simp [← f_add 0 0]
-
-def homeomorphism : ℝ →+ ℝ where
-  toFun := f
-  map_zero' := map_zero f_add
-  map_add' := f_add
-
-lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homeomorphism f_add) x
-
-lemma map_sub' (t₁ t₂ : ℝ) : f (t₁ - t₂) = f t₁ - f t₂ :=
-  map_sub (homeomorphism f_add) t₁ t₂
-
-lemma map_nmul (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
-  repeat rw [← nsmul_eq_mul]
-  exact map_nsmul (homeomorphism f_add) n x
-
-lemma map_zmul (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
-  repeat rw [← zsmul_eq_mul]
-  exact map_zsmul (homeomorphism f_add) z x
-
-lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
-    f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
-  rify at n_ne_zero
-  apply mul_left_cancel₀ n_ne_zero
-  rw [← map_nmul f_add]
-  field_simp
-
-lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
-  rw [← Rat.num_div_den q]
-  push_cast
-  calc f (q.num / q.den * x)
-    _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
-    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
-    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [map_inv_nat f_add q.den q.den_nz x]
-    _ = q.num / q.den * f x := by field_simp
-
-end RealAdditive
 
 open Filter Topology
 
