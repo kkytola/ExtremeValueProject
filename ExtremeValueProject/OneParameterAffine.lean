@@ -280,37 +280,71 @@ lemma eq_top_of_subgroup_of_measure_pos {S : AddSubgroup ℝ}
     S = ⊤ := by
   sorry
 
-lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
-    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+lemma exists_forall_ub_of_additive_of_le_on_measure_pos
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂)= f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) :
-    ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, |f x| ≤ c := by
+    ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, f x ≤ c := by
   obtain ⟨x₁, x₂, x₁_lt_x₂, h_Ioo⟩ := exists_Ioo_subset_add_of_measure_pos A_mble A_pos
   let y := (x₁ + x₂) / 2
   let δ := (x₂ - x₁) / 2
   use δ; constructor; positivity
   use 2*M - f y
-  have pos : ∀ t ∈ Ioo (-δ) δ, f t ≤ 2 * M - f y := by
-    intro t abs_t_lt_δ
-    obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
-    calc
-          f t
-      _ = f (a + b - y) := by rw [(by linarith : t = a + b - y)]
-      _ = f a + f b - f y := by rw [RealAdditive.map_sub' f_add, f_add]
-      _ ≤ 2*M - f y := by
-        grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
-  have neg : ∀ t ∈ Ioo (-δ) δ, - (2 * M - f y) ≤ f t := by
-    intro t abs_t_lt_δ
-    have : f (-t) ≤ 2 * M - f y :=
-      pos (-t) (by simpa only [neg_mem_Ioo_iff, neg_neg] using abs_t_lt_δ)
-    calc
-          - (2 * M - f y)
-      _ ≤ - f (-t) := by linarith
-      _ = f t := by simp [RealAdditive.map_neg' f_add]
   intro t abs_t_lt_δ
+  obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
+  calc
+        f t
+    _ = f (a + b - y) := by rw [(by linarith : t = a + b - y)]
+    _ = f a + f b - f y := by rw [RealAdditive.map_sub' f_add, f_add]
+    _ ≤ 2*M - f y := by
+      grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
+
+lemma exists_forall_lb_of_additive_of_le_on_measure_pos
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
+    {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) :
+    ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, c ≤ f x := by
+  obtain ⟨x₁, x₂, x₁_lt_x₂, h_Ioo⟩ := exists_Ioo_subset_add_of_measure_pos A_mble A_pos
+  obtain ⟨δ, hδ, c, ub_forall⟩ :=
+    exists_forall_ub_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
+  use δ ; constructor; exact hδ
+  use (-c)
+  intro t abs_t_lt_δ
+  have hf := ub_forall (-t) (by simpa only [neg_mem_Ioo_iff, neg_neg] using abs_t_lt_δ)
+  calc
+        - c
+    _ ≤ - f (-t) := by linarith
+    _ = f t := by simp [RealAdditive.map_neg' f_add]
+
+lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
+    {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
+    {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
+    {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) :
+    ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, |f x| ≤ c := by
+  obtain ⟨δ₁, hδ₁, c₁, f_ub⟩ :=
+    exists_forall_ub_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
+  obtain ⟨δ₂, hδ₂, c₂, f_lb⟩ :=
+    exists_forall_lb_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
+  use (min δ₁ δ₂); constructor; positivity
+  use (max |c₁| |c₂|)
+  intro x hx
+  rw [Set.mem_Ioo, neg_lt, lt_min_iff, lt_min_iff] at hx
+  obtain ⟨⟨neg_x_lt_δ₁, neg_x_lt_δ₂⟩, x_lt_δ₁, x_lt_δ₂⟩ := hx
+  have hx₁ : x ∈ Ioo (-δ₁) δ₁ := by
+       rw [Set.mem_Ioo]
+       exact And.intro (neg_lt_of_neg_lt neg_x_lt_δ₁) x_lt_δ₁
+  have hx₂ : x ∈ Ioo (-δ₂) δ₂ := by
+       rw [Set.mem_Ioo]
+       exact And.intro (neg_lt_of_neg_lt neg_x_lt_δ₂) x_lt_δ₂
   apply abs_le.mpr; constructor
-  · simpa using neg t abs_t_lt_δ
-  · exact pos t abs_t_lt_δ
+  · calc
+      - max |c₁| |c₂| ≤ - |c₂| := by grw [@Std.right_le_max _ _ _ _ _ |c₁| |c₂|]
+      _ ≤ c₂ := neg_abs_le c₂
+      _ ≤ f x := f_lb x hx₂
+  · calc
+      f x ≤ c₁ := f_ub x hx₁
+      _ ≤ |c₁| := le_abs_self c₁
+      _ ≤ max |c₁| |c₂|:= Std.left_le_max
 
 open Topology in
 lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
