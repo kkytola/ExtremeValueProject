@@ -384,7 +384,7 @@ lemma AffineIncrEquiv.conjugate_homOfIndex₀ (A : AffineIncrEquiv) (β : ℝ) (
     A * homOfIndex₀ β s * A⁻¹ = homOfIndex₀ (β * A.coefs.1) s := by
   sorry -- **Issue #46**
 
-lemma AffineIncrEquiv.homOfIndex_zero_ext_of_coefs
+lemma AffineIncrEquiv.homOfIndex₀_ext_of_coefs
     {A₁ : AffineIncrEquiv} {t β : ℝ} (h : A₁.coefs = ((homOfIndex₀ β) t).coefs) :
     A₁ = (homOfIndex₀ β) t := by
   ext x
