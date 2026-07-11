@@ -261,23 +261,23 @@ lemma map_zero : f 0 = 0 := by
   suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
   simp [← f_add 0 0]
 
-def homeomorphism : ℝ →+ ℝ where
+def homomorphism : ℝ →+ ℝ where
   toFun := f
   map_zero' := map_zero f_add
   map_add' := f_add
 
-lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homeomorphism f_add) x
+lemma map_neg' (x : ℝ) : f (- x) = - f x := map_neg (homomorphism f_add) x
 
 lemma map_sub' (t₁ t₂ : ℝ) : f (t₁ - t₂) = f t₁ - f t₂ :=
-  map_sub (homeomorphism f_add) t₁ t₂
+  map_sub (homomorphism f_add) t₁ t₂
 
 lemma map_nmul (n : ℕ) (x : ℝ) : f (n * x) = n * f x := by
   repeat rw [← nsmul_eq_mul]
-  exact map_nsmul (homeomorphism f_add) n x
+  exact map_nsmul (homomorphism f_add) n x
 
 lemma map_zmul (z : ℤ) (x : ℝ) : f (z * x) = z * f x := by
   repeat rw [← zsmul_eq_mul]
-  exact map_zsmul (homeomorphism f_add) z x
+  exact map_zsmul (homomorphism f_add) z x
 
 lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
     f ((n : ℝ)⁻¹ * x) = (n : ℝ)⁻¹ * f x := by
