@@ -587,8 +587,7 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
       _ = rexp (α * t) * b s + b t - b t - b s := by rw [b_hom, a_eq_exp_α_s]
       _ = (rexp (α * t) - 1) * b s             := by ring
     let c := - (b 1 / (rexp (α * 1) - 1))
-    have b_eq_c_mul_exp : b = fun t ↦ c * (1 - rexp (α * t)) := by
-      ext t
+    have b_eq_c_mul_exp (t : ℝ) : b t = c * (1 - rexp (α * t)) := by
       by_cases t_zero : t = 0
       · simp [t_zero, b_zero]
       · have aux : (rexp (α * 1) - 1) ≠ 0 := by simp [sub_eq_zero, α_zero]
@@ -601,7 +600,7 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     use α, c
     suffices ∀ (s : ℝ), f s = homOfIndex α c s by ext s : 2 ; exact this s
     refine fun s ↦ AffineIncrEquiv.ext_of_coefs (Prod.eq_iff_fst_eq_snd_eq.mpr ?_)
-    exact ⟨by simpa using congr_fun a_eq_exp_α_s s, by simpa using congr_fun b_eq_c_mul_exp s⟩
+    exact ⟨by simpa using congr_fun a_eq_exp_α_s s, by simpa using b_eq_c_mul_exp s⟩
 
 /-- Characterization of nontrivial homomorphisms `f : ℝ → AffineIncrEquiv`. -/
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization_of_nontrivial
