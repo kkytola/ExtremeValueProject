@@ -289,11 +289,12 @@ lemma map_inv_nat (n : ℕ) (n_ne_zero : n ≠ 0) (x : ℝ) :
 lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
   rw [← Rat.num_div_den q]
   push_cast
-  calc f (q.num / q.den * x)
+  calc
+        f (q.num / q.den * x)
     _ = f (q.num * ((q.den : ℝ)⁻¹ * x)) := by field_simp
-    _ = q.num * f ((q.den : ℝ)⁻¹ * x) := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
-    _ = q.num * ((q.den : ℝ)⁻¹ * f x) := by rw [map_inv_nat f_add q.den q.den_nz x]
-    _ = q.num / q.den * f x := by field_simp
+    _ = q.num * f ((q.den : ℝ)⁻¹ * x)   := map_zmul f_add q.num ((q.den : ℝ)⁻¹ * x)
+    _ = q.num * ((q.den : ℝ)⁻¹ * f x)   := by rw [map_inv_nat f_add q.den q.den_nz x]
+    _ = q.num / q.den * f x             := by field_simp
 
 end RealAdditive
 
@@ -305,11 +306,9 @@ lemma linear_of_additive_of_le_on_measure_pos
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) (x : ℝ) :
     f x = (f 1) * x := by
   suffices h : |f x - x * f 1| = 0 by simpa [sub_eq_zero, mul_comm x (f 1)] using h
-  rcases exists_nhd_abs_le_of_additive_of_le_on_measure_pos f_add A_mble
-                                                            A_pos f_bdd_on_A
-    with ⟨B, B_in_nhds_0, c, f_bdd_on_B⟩
-  rcases mem_nhds_iff_exists_Ioo_subset.mp B_in_nhds_0
-    with ⟨a, b, ⟨zero_in_Ioo, Ioo_subset_B⟩⟩
+  obtain ⟨B, B_in_nhds_0, c, f_bdd_on_B⟩ :=
+    exists_nhd_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
+  obtain ⟨a, b, ⟨zero_in_Ioo, Ioo_subset_B⟩⟩ := mem_nhds_iff_exists_Ioo_subset.mp B_in_nhds_0
   obtain ⟨a_neg, b_pos⟩ := Set.mem_Ioo.mp zero_in_Ioo
   let δ := min |a| |b|
   have δ_pos : 0 < δ := lt_min (abs_pos_of_neg a_neg) (abs_pos_of_pos b_pos)
@@ -342,20 +341,21 @@ lemma linear_of_additive_of_le_on_measure_pos
     have hq_symm : |q - x| < δ / n := by
         rw [abs_sub_comm]
         exact hq
-    calc |f x - x * f 1|
+    calc
+          |f x - x * f 1|
       _ = |f (x - q) + q * f 1 - x * f 1| := by
         simp [RealAdditive.map_sub' f_add, ← RealAdditive.map_rat f_add]
-      _ = |f (x - q) + (q - x) * f 1| := by group
+      _ = |f (x - q) + (q - x) * f 1|     := by group
       _ ≤ |f (x - q)| + |(q - x)| * |f 1| := by grw [abs_add_le, abs_mul]
-      _ ≤ c / n + |(q - x)| * |f 1| :=
-        add_le_add_left (f_bdd_within n n_ne_zero hq) (|q - x| * |f 1|)
-      _ ≤ c / n + (δ / n) * |f 1| := by
+      _ ≤ c / n + |(q - x)| * |f 1|       := add_le_add_left (f_bdd_within n n_ne_zero hq)
+                                                             (|q - x| * |f 1|)
+      _ ≤ c / n + (δ / n) * |f 1|         := by
         by_cases h_zero : 0 = |f 1|
         · simp [← h_zero]
         · have h_zero : 0 < |f 1| := lt_of_le_of_ne (abs_nonneg (f 1)) h_zero
           suffices h : |q - x| * |f 1| < (δ / ↑n) * |f 1| by linarith
           exact (mul_lt_mul_iff_left₀ h_zero).mpr hq_symm
-      _ = (c + δ * |f 1|) / n := by field_simp
+      _ = (c + δ * |f 1|) / n             := by field_simp
   have tendsto_zero : Filter.Tendsto (fun n : ℕ ↦ |f x - x * f 1|) atTop (𝓝 0) :=
     have lb : ∀ᶠ n : ℕ in atTop, 0 ≤ |f x - x * f 1| := by
       filter_upwards [Ioi_mem_atTop 0] with _ _
