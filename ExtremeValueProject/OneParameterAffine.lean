@@ -298,8 +298,7 @@ lemma map_rat (q : ℚ) (x : ℝ) : f (q * x) = q * f x := by
 
 end RealAdditive
 
-open Filter Topology
-
+open Filter Topology in
 lemma linear_of_additive_of_le_on_measure_pos
     {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
