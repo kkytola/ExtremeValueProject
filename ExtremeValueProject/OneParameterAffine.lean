@@ -298,8 +298,9 @@ lemma eq_exp_const_mul_of_multiplicative_of_measurable {f : ℝ → ℝ} (f_pos 
 
 lemma eq_const_mul_one_sub_exp_of_multiplicative_with_scaling_of_measurable
     {α : ℝ} (α_ne_zero : α ≠ 0) {b : ℝ → ℝ}
-    (b_eqn : ∀ s t : ℝ, b (s + t) = rexp (α * s) * b t + b s) (b_zero : b 0 = 0) :
+    (b_eqn : ∀ s t : ℝ, b (s + t) = rexp (α * s) * b t + b s) :
     ∃ c : ℝ, ∀ t : ℝ, b t = c * (1 - rexp (α * t)) := by
+  have b_zero : b 0 = 0 := by simpa using b_eqn 0 0
   let c := - (b 1 / (rexp (α * 1) - 1))
   have refactored (s t : ℝ) :
       (rexp (α * s) - 1) * b t = (rexp (α * t) - 1) * b s := calc
@@ -585,9 +586,6 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     AffineIncrEquiv.homomorphism_coef_eqn_snd f s t
   have a_mble : Measurable a := AffineIncrEquiv.measurable_coefs_fst.comp f_mble
   have b_mble : Measurable b := AffineIncrEquiv.measurable_coefs_snd.comp f_mble
-  have b_zero : b 0 = 0 := by
-    convert AffineIncrEquiv.coefs_snd_one
-    simp [show f (0 : ℝ) = 1 from map_one f]
   obtain ⟨α, a_eq_exp_α_s⟩ : ∃ α, a = fun s ↦ rexp (α * s) :=
     eq_exp_const_mul_of_multiplicative_of_measurable a_pos a_hom a_mble
   by_cases α_zero : α = 0
@@ -605,7 +603,7 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
   · right
     rw [a_eq_exp_α_s] at b_hom
     obtain ⟨c, b_eq_c_mul_exp⟩ :=
-      eq_const_mul_one_sub_exp_of_multiplicative_with_scaling_of_measurable α_zero b_hom b_zero
+      eq_const_mul_one_sub_exp_of_multiplicative_with_scaling_of_measurable α_zero b_hom
     use α, c
     suffices ∀ (s : ℝ), f s = homOfIndex α c s by ext s : 2 ; exact this s
     refine fun s ↦ AffineIncrEquiv.ext_of_coefs (Prod.eq_iff_fst_eq_snd_eq.mpr ?_)
