@@ -55,8 +55,9 @@
 \begin{lemma}[Functional equation translation coefficient solution with $\rho = 0$]
   \label{lem:solution-functional-eqn-translation-no-scaling}
   %\uses{def:lem:oriented-affine-action-on-cdf}
-  % \lean{}
-  % \leanok
+  \lean{eq_const_mul_of_additive_of_measurable,
+        eq_exp_const_mul_of_multiplicative_of_measurable}
+  \leanok
   Suppose that
   $b \colon (0,+\infty) \to \bR$ is a measurable function
   satisfying, for any $s, t > 0$,
@@ -71,7 +72,7 @@
 \end{lemma}
 \begin{proof}
   \uses{lem:solution-functional-eqn-scaling}
-  % \leanok
+  \leanok
 \end{proof}
 
 \begin{lemma}[Functional equation translation coefficient solution with $\rho \ne 0$]
@@ -143,5 +144,5 @@ so in formal statements we prefer the former choice.)}
     lem:solution-functional-eqn-scaling,
     lem:solution-functional-eqn-translation-no-scaling,
     lem:solution-functional-eqn-translation-with-scaling}
-  % \leanok
+  \leanok
 \end{proof}
