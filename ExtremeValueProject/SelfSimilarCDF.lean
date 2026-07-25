@@ -138,11 +138,12 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
       congr
       simpa only [Nat.cast_ofNat] using exp_log zero_lt_two
     have obs : (homOfIndex α c (Real.log 2))⁻¹ x > x := by
-      simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, neg_mul, homOfIndex_coefs_snd]
-      have aux_pos : 0 < rexp (-(log 2 * α)) := exp_pos _
-      have aux_lt_one : rexp (-(log 2 * α)) < 1 := by
-        simpa only [exp_lt_one_iff, Left.neg_neg_iff] using mul_pos (log_pos one_lt_two) α_pos
-      linarith [show (c - x) * (1 - rexp (-(log 2 * α))) > 0
+      simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, mul_neg, homOfIndex_coefs_snd]
+      have aux_pos : 0 < rexp (-(α * log 2)) := exp_pos _
+      have aux_lt_one : rexp (-(α * log 2)) < 1 := by
+        simpa only [exp_lt_one_iff, Left.neg_neg_iff, mul_comm]
+          using mul_pos (log_pos one_lt_two) α_pos
+      linarith [show (c - x) * (1 - rexp (-(α * log 2))) > 0
                 from mul_pos (by linarith) (by linarith)]
     apply le_antisymm
     · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
@@ -157,14 +158,14 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
   have Gx_pow (s) : (homOfIndex α c s • G) x = Real.rpow (G x) (Real.exp s) := by
     simp only [rpow_eq_pow, ← CumulativeDistributionFunction.pow_apply_eq G (exp_pos s) x, hG s]
   have but : Tendsto (fun s ↦ (homOfIndex α c s)⁻¹ x) atBot atBot := by
-    have same_but : Tendsto (fun s ↦ Real.exp (-(s * α)) * (x - c) + c) atBot atBot := by
+    have same_but : Tendsto (fun s ↦ Real.exp (-(α * s)) * (x - c) + c) atBot atBot := by
       apply tendsto_atBot_add_const_right atBot c
       apply (tendsto_mul_const_atBot_of_neg (show x - c < 0 by linarith)).mpr
       apply tendsto_exp_atTop.comp
       simp only [tendsto_neg_atTop_iff]
-      exact (tendsto_mul_const_atBot_of_pos α_pos).mpr tendsto_id
+      exact (tendsto_const_mul_atBot_of_pos α_pos).mpr tendsto_id
     exact same_but.congr fun s => by
-      simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, neg_mul, homOfIndex_coefs_snd]
+      simp only [homOfIndex_inv, apply_eq, homOfIndex_coefs_fst, mul_neg, homOfIndex_coefs_snd]
       ring
   have oops (s) : G ((homOfIndex α c s)⁻¹ x) = 1 := by
     change (homOfIndex α c s • G) x = 1
@@ -309,7 +310,7 @@ theorem classification {G : CumulativeDistributionFunction}
           congr
           simpa only [Nat.cast_ofNat] using exp_log zero_lt_two
         have obs : (homOfIndex₀ β (Real.log 2))⁻¹ x > x := by
-          simp [show Real.log 2 * β < 0 from mul_neg_of_pos_of_neg (log_pos one_lt_two) β_neg]
+          simp [show β * Real.log 2 < 0 from mul_neg_of_neg_of_pos β_neg (log_pos one_lt_two)]
         apply le_antisymm
         · exact pow_le_of_le_one (G.apply_nonneg x) (G.apply_le_one x) two_ne_zero
         · simpa [← Gx_sq] using G.mono obs.le

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2025 Kalle Kytölä. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kalle Kytölä, ...
+Authors: Kalle Kytölä, Joel Kronqvist, ...
 -/
 import Mathlib
 import ExtremeValueProject.AffineTransformation
@@ -296,6 +296,32 @@ lemma eq_exp_const_mul_of_multiplicative_of_measurable {f : ℝ → ℝ} (f_pos 
   obtain ⟨α, key⟩ := eq_const_mul_of_additive_of_measurable g_additive g_mble
   refine ⟨α, by ext s ; rw [f_eq_exp_g, key]⟩
 
+lemma eq_const_mul_one_sub_exp_of_multiplicative_with_scaling_of_measurable
+    {α : ℝ} (α_ne_zero : α ≠ 0) {b : ℝ → ℝ}
+    (b_eqn : ∀ s t : ℝ, b (s + t) = rexp (α * s) * b t + b s) :
+    ∃ c : ℝ, ∀ t : ℝ, b t = c * (1 - rexp (α * t)) := by
+  have b_zero : b 0 = 0 := by simpa using b_eqn 0 0
+  let c := - (b 1 / (rexp (α * 1) - 1))
+  have refactored (s t : ℝ) :
+      (rexp (α * s) - 1) * b t = (rexp (α * t) - 1) * b s := calc
+        (rexp (α * s) - 1) * b t
+    _ = rexp (α * s) * b t + b s - b t - b s := by ring
+    _ = b (s + t) - b t - b s                := by rw [b_eqn]
+    _ = b (t + s) - b t - b s                := by rw [add_comm s t]
+    _ = rexp (α * t) * b s + b t - b t - b s := by rw [b_eqn]
+    _ = (rexp (α * t) - 1) * b s             := by ring
+  use c
+  intro t
+  by_cases t_zero : t = 0
+  · simp [t_zero, b_zero]
+  · have aux : (rexp (α * 1) - 1) ≠ 0 := by simp [sub_eq_zero, α_ne_zero]
+    calc  b t
+      _ = b t * ((rexp (α * 1) - 1) / (rexp (α * 1) - 1))     := by rw [div_self aux] ; ring
+      _ = (rexp (α * 1) - 1) * b t / (rexp (α * 1) - 1)       := by ring
+      _ = (rexp (α * t) - 1) * b 1 / (rexp (α * 1) - 1)       :=
+        congrArg (· / (rexp (α * 1) - 1)) (refactored 1 t)
+      _ = c * (1 - rexp (α * t))                              := by ring
+
 end cauchy_hamel_functional_equation
 
 
@@ -305,7 +331,7 @@ section one_parameter_subgroups_of_affine_transformations
 (`β` is a real parameter: each `β` gives a different (but related) homomorphism) -/
 noncomputable def AffineIncrEquiv.homOfIndex₀ (β : ℝ) :
     MonoidHom (Multiplicative ℝ) AffineIncrEquiv where
-  toFun s := .mkOfCoefs zero_lt_one (s.toAdd * β)
+  toFun s := .mkOfCoefs zero_lt_one (β * s.toAdd)
   map_one' := by ext x ; simp
   map_mul' s₁ s₂ := by
     ext x
@@ -317,12 +343,12 @@ noncomputable def AffineIncrEquiv.homOfIndex₀ (β : ℝ) :
 (`α c` are real parameters: each `α c` give a different homomorphism) -/
 noncomputable def AffineIncrEquiv.homOfIndex (α c : ℝ) :
     MonoidHom (Multiplicative ℝ) AffineIncrEquiv where
-  toFun s := .mkOfCoefs (show 0 < Real.exp (s.toAdd * α) from Real.exp_pos _)
-              (c * (1 - Real.exp (s.toAdd * α)))
+  toFun s := .mkOfCoefs (show 0 < Real.exp (α * s.toAdd) from Real.exp_pos _)
+              (c * (1 - Real.exp (α * s.toAdd)))
   map_one' := by ext x ; simp
   map_mul' s₁ s₂ := by
     ext x
-    simp [add_mul, Real.exp_add]
+    simp [mul_add, Real.exp_add]
     ring
 
 @[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_fst {β s : ℝ} :
@@ -330,17 +356,17 @@ noncomputable def AffineIncrEquiv.homOfIndex (α c : ℝ) :
   simp [homOfIndex₀, MonoidHom.coe_mk, OneHom.coe_mk, coefs_fst_mkOfCoefs]
 
 @[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_snd {β s : ℝ} :
-    (homOfIndex₀ β s).coefs.2 = s * β := by
+    (homOfIndex₀ β s).coefs.2 = β * s := by
   simp only [homOfIndex₀, MonoidHom.coe_mk, OneHom.coe_mk, coefs_snd_mkOfCoefs]
   congr
 
 @[simp] lemma AffineIncrEquiv.homOfIndex_coefs_fst {α c s : ℝ} :
-    (homOfIndex α c s).coefs.1 = Real.exp (s * α) := by
+    (homOfIndex α c s).coefs.1 = Real.exp (α * s) := by
   simp only [homOfIndex, MonoidHom.coe_mk, OneHom.coe_mk, coefs_fst_mkOfCoefs, Real.exp_eq_exp]
   congr
 
 @[simp] lemma AffineIncrEquiv.homOfIndex_coefs_snd {α c s : ℝ} :
-    (homOfIndex α c s).coefs.2 = c * (1 - Real.exp (s * α)) := by
+    (homOfIndex α c s).coefs.2 = c * (1 - Real.exp (α * s)) := by
   simp only [homOfIndex, MonoidHom.coe_mk, OneHom.coe_mk, coefs_snd_mkOfCoefs]
   congr
 
@@ -414,7 +440,7 @@ lemma AffineIncrEquiv.homOfIndex_add (α c : ℝ) (s₁ s₂ : ℝ) :
   simp only [homOfIndex_add, mul_apply_eq_comp_apply]
 
 lemma AffineIncrEquiv.homOfIndex_eq_homOfIndex_one_mul {α c s : ℝ} :
-    homOfIndex α c s = homOfIndex 1 c (s * α) := by
+    homOfIndex α c s = homOfIndex 1 c (α * s) := by
   ext x
   simp
 
@@ -551,7 +577,37 @@ lemma measurable_toMultiplicative :
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (f_mble : Measurable f) :
     (∃ β, f = homOfIndex₀ β) ∨ (∃ α c, f = homOfIndex α c) := by
-  sorry -- TODO: Create issue.
+  let a (s : ℝ) : ℝ := (f s).coefs.1
+  let b (s : ℝ) : ℝ := (f s).coefs.2
+  have a_pos (s : ℝ) : 0 < a s := (f s).coefs_fst_pos
+  have a_hom (s t : ℝ) : a (s + t) = a s * a t :=
+    AffineIncrEquiv.homomorphism_coef_eqn_fst f s t
+  have b_hom (s t : ℝ) : b (s + t) = a s * b t + b s :=
+    AffineIncrEquiv.homomorphism_coef_eqn_snd f s t
+  have a_mble : Measurable a := AffineIncrEquiv.measurable_coefs_fst.comp f_mble
+  have b_mble : Measurable b := AffineIncrEquiv.measurable_coefs_snd.comp f_mble
+  obtain ⟨α, a_eq_exp_α_s⟩ : ∃ α, a = fun s ↦ rexp (α * s) :=
+    eq_exp_const_mul_of_multiplicative_of_measurable a_pos a_hom a_mble
+  by_cases α_zero : α = 0
+  · left
+    have a_eq_one : a = 1 := by
+      ext t
+      simp [a_eq_exp_α_s, α_zero]
+    have b_hom' (s t : ℝ) : b (s + t) = b s + b t := by
+      simpa [a_eq_exp_α_s, α_zero, add_comm t s] using b_hom t s
+    obtain ⟨β, b_eq_β_mul_s⟩ : ∃ α, b = fun s => α * s :=
+      eq_const_mul_of_additive_of_measurable b_hom' b_mble
+    use β
+    suffices ∀ (s x : ℝ), (f s).coefs.1 * x + (f s).coefs.2 = x + β * s by aesop
+    exact fun s x ↦ show a s * x + b s = x + β * s by simp [a_eq_one, b_eq_β_mul_s]
+  · right
+    rw [a_eq_exp_α_s] at b_hom
+    obtain ⟨c, b_eq_c_mul_exp⟩ :=
+      eq_const_mul_one_sub_exp_of_multiplicative_with_scaling_of_measurable α_zero b_hom
+    use α, c
+    suffices ∀ (s : ℝ), f s = homOfIndex α c s by ext s : 2 ; exact this s
+    refine fun s ↦ AffineIncrEquiv.ext_of_coefs (Prod.eq_iff_fst_eq_snd_eq.mpr ?_)
+    exact ⟨by simpa using congr_fun a_eq_exp_α_s s, by simpa using b_eq_c_mul_exp s⟩
 
 /-- Characterization of nontrivial homomorphisms `f : ℝ → AffineIncrEquiv`. -/
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization_of_nontrivial
