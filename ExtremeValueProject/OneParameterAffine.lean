@@ -196,7 +196,6 @@ lemma IsOpen.countable_setOf_connectedComponentIn
   let ψ : {C : Set α | ∃ x ∈ s, C = connectedComponentIn s x} → ConnectedComponents s :=
     fun C ↦ ConnectedComponents.mk
             ⟨(mem_setOf_eq.mp C.prop).choose, (mem_setOf_eq.mp C.prop).choose_spec.1⟩
-
   have ψ_inj : Function.Injective ψ := by
     intro C₁ C₂ hψC
     ext1
