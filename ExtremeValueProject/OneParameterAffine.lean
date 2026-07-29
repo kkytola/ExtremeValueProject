@@ -539,12 +539,6 @@ lemma AffineIncrEquiv.conjugate_homOfIndex₀ (A : AffineIncrEquiv) (β : ℝ) (
     A * homOfIndex₀ β s * A⁻¹ = homOfIndex₀ (β * A.coefs.1) s := by
   sorry -- **Issue #46**
 
-lemma AffineIncrEquiv.homOfIndex_zero_ext_of_coefs
-    {A₁ : AffineIncrEquiv} {t β : ℝ} (h : A₁.coefs = ((homOfIndex₀ β) t).coefs) :
-    A₁ = (homOfIndex₀ β) t := by
-  ext x
-  simp [h]
-
 @[simp] lemma AffineIncrEquiv.homOfIndex_zero' (α c : ℝ) :
     homOfIndex α c (.ofAdd 0) = 1 :=
   map_one ..
@@ -708,52 +702,6 @@ lemma measurable_toAdd :
 lemma measurable_toMultiplicative :
     Measurable (fun (s : ℝ) ↦ Multiplicative.ofAdd s) :=
   continuous_ofAdd.measurable
-
-noncomputable def AffineIncrEquiv.hom_coef_fst
-    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) :=
-  fun s ↦ (f s).coefs.1
-
-noncomputable def AffineIncrEquiv.hom_coef_snd
-    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) :=
-  fun s ↦ (f s).coefs.2
-
-lemma AffineIncrEquiv.hom_ext
-    (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv)
-    (g : MonoidHom (Multiplicative ℝ) AffineIncrEquiv)
-    (fst_coefs_eq : hom_coef_fst f = hom_coef_fst g)
-    (snd_coefs_eq : hom_coef_snd f = hom_coef_snd g) : f = g := by
-  ext s x; simp
-  change hom_coef_fst f s * x + hom_coef_snd f s
-       = hom_coef_fst g s * x + hom_coef_snd g s
-  rw [fst_coefs_eq, snd_coefs_eq]
-
-lemma AffineIncrEquiv.homOfIndex_iff_ext
-    {α c : ℝ}
-    {f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv}
-    (coef_1_eq : hom_coef_fst f = λ s : ℝ ↦ Real.exp (α * s))
-    (coef_2_eq : hom_coef_snd f = λ s : ℝ ↦ c * (1 - Real.exp (α * s))) :
-      f = AffineIncrEquiv.homOfIndex α c := by
-  apply AffineIncrEquiv.hom_ext
-  · rw [coef_1_eq]
-    unfold hom_coef_fst
-    simp; rfl
-  · rw [coef_2_eq]
-    unfold hom_coef_snd
-    simp; rfl
-
-lemma AffineIncrEquiv.homOfIndex₀_iff_ext
-    {β : ℝ} {f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv}
-    (coef_1_one : hom_coef_fst f = 1)
-    (coef_2_eq_t_β : hom_coef_snd f = fun s ↦ β * s) :
-      f = homOfIndex₀ β := by
-  apply AffineIncrEquiv.hom_ext
-  · rw [coef_1_one]
-    unfold hom_coef_fst
-    simp; rfl
-  · rw [coef_2_eq_t_β]
-    unfold hom_coef_snd
-    ext s
-    simp
 
 /-- Characterization of homomorphisms `f : ℝ → AffineIncrEquiv`. -/
 theorem AffineIncrEquiv.homomorphism_from_Real_characterization
