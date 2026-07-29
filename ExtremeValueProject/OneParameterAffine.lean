@@ -325,26 +325,25 @@ lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_ub_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   obtain ⟨δ₂, hδ₂, c₂, f_lb⟩ :=
     exists_forall_lb_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
-  use (min δ₁ δ₂); constructor; positivity
-  use (max |c₁| |c₂|)
-  intro x hx
-  rw [Set.mem_Ioo, neg_lt, lt_min_iff, lt_min_iff] at hx
-  obtain ⟨⟨neg_x_lt_δ₁, neg_x_lt_δ₂⟩, x_lt_δ₁, x_lt_δ₂⟩ := hx
-  have hx₁ : x ∈ Ioo (-δ₁) δ₁ := by
-       rw [Set.mem_Ioo]
-       exact And.intro (neg_lt_of_neg_lt neg_x_lt_δ₁) x_lt_δ₁
-  have hx₂ : x ∈ Ioo (-δ₂) δ₂ := by
-       rw [Set.mem_Ioo]
-       exact And.intro (neg_lt_of_neg_lt neg_x_lt_δ₂) x_lt_δ₂
+  refine ⟨min δ₁ δ₂, ⟨by positivity, ⟨max |c₁| |c₂|, ?_⟩⟩⟩
+  intro x x_in_Ioo_of_min
+  obtain ⟨⟨neg_x_lt_δ₁, neg_x_lt_δ₂⟩, x_lt_δ₁, x_lt_δ₂⟩
+           : (-x < δ₁ ∧ -x < δ₂) ∧ x < δ₁ ∧ x < δ₂ := by
+    rw [Set.mem_Ioo, neg_lt, lt_min_iff, lt_min_iff] at x_in_Ioo_of_min
+    exact x_in_Ioo_of_min
+  have x_in_Ioo₁ : x ∈ Ioo (-δ₁) δ₁ := Set.mem_Ioo.mp ⟨neg_lt_of_neg_lt neg_x_lt_δ₁, x_lt_δ₁⟩
+  have x_in_Ioo₂ : x ∈ Ioo (-δ₂) δ₂ := Set.mem_Ioo.mp ⟨neg_lt_of_neg_lt neg_x_lt_δ₂, x_lt_δ₂⟩
   apply abs_le.mpr; constructor
   · calc
-      - max |c₁| |c₂| ≤ - |c₂| := by grw [@Std.right_le_max _ _ _ _ _ |c₁| |c₂|]
-      _ ≤ c₂ := neg_abs_le c₂
-      _ ≤ f x := f_lb x hx₂
+          - max |c₁| |c₂|
+      _ ≤ - |c₂|          := by grw [show |c₂| ≤ max |c₁| |c₂| from Std.right_le_max]
+      _ ≤ c₂              := neg_abs_le c₂
+      _ ≤ f x             := f_lb x x_in_Ioo₂
   · calc
-      f x ≤ c₁ := f_ub x hx₁
-      _ ≤ |c₁| := le_abs_self c₁
-      _ ≤ max |c₁| |c₂|:= Std.left_le_max
+          f x
+      _ ≤ c₁              := f_ub x x_in_Ioo₁
+      _ ≤ |c₁|            := le_abs_self c₁
+      _ ≤ max |c₁| |c₂|   := Std.left_le_max
 
 open Topology in
 lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
