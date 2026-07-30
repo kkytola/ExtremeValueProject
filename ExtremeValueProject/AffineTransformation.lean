@@ -391,10 +391,8 @@ lemma AffineIncrEquiv.ext_of_coefs {A₁ A₂ : AffineIncrEquiv} (h : A₁.coefs
 
 private lemma apply_eq_twice (A₁ A₂ : AffineIncrEquiv) (x : ℝ) :
     (A₁ * A₂) x = A₁.coefs.1 * A₂.coefs.1 * x + A₁.coefs.1 * A₂.coefs.2 + A₁.coefs.2 := by
-  calc
-      A₁ (A₂ x)
-  _ = A₁.coefs.1 * (A₂.coefs.1 * x + A₂.coefs.2) + A₁.coefs.2            := by simp
-  _ = A₁.coefs.1 * A₂.coefs.1 * x + A₁.coefs.1 * A₂.coefs.2 + A₁.coefs.2 := by ring
+  simp only [AffineIncrEquiv.mul_apply_eq_comp_apply A₁ A₂ x, AffineIncrEquiv.apply_eq,
+             mul_add, mul_assoc]
 
 @[simp] lemma AffineIncrEquiv.coefs_snd_mul (A₁ A₂ : AffineIncrEquiv) :
     (A₁ * A₂).coefs.2 = A₁.coefs.1 * A₂.coefs.2 + A₁.coefs.2 := by
@@ -402,10 +400,7 @@ private lemma apply_eq_twice (A₁ A₂ : AffineIncrEquiv) (x : ℝ) :
 
 @[simp] lemma AffineIncrEquiv.coefs_fst_mul (A₁ A₂ : AffineIncrEquiv) :
     (A₁ * A₂).coefs.1 = A₁.coefs.1 * A₂.coefs.1 := by
-  have coef_eqn : (A₁ * A₂).coefs.1 + (A₁.coefs.1 * A₂.coefs.2 + A₁.coefs.2) =
-      A₁.coefs.1 * A₂.coefs.1 + A₁.coefs.1 * A₂.coefs.2 + A₁.coefs.2 := by
-    simpa using apply_eq_twice A₁ A₂ 1
-  linarith [AffineIncrEquiv.coefs_snd_mul A₁ A₂]
+  linarith [by simpa using apply_eq_twice A₁ A₂ 1]
 
 /-- The inverse `A⁻¹` of an orientation-preserving affine map `A : ℝ → ℝ` of the
 form `x ↦ a * x + b` is `y ↦ α * x + β` where `α = a⁻¹`. -/
