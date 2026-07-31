@@ -430,11 +430,12 @@ lemma AffineIncrEquiv.inv_mul_eq_mkOfCoefs (A₁ A₂ : AffineIncrEquiv) :
 
 lemma AffineIncrEquiv.continuous_coefs_fst :
     Continuous fun (A : AffineIncrEquiv) ↦ A.coefs.1 := by
-  sorry
+  rw [show (·.coefs.1) = fun (A : AffineIncrEquiv) ↦ A 1 - A 0 by simp]
+  exact Continuous.sub (continuous_apply 1) (continuous_apply 0)
 
 lemma AffineIncrEquiv.continuous_coefs_snd :
-    Continuous fun (A : AffineIncrEquiv) ↦ A.coefs.2 := by
-  sorry
+    Continuous fun (A : AffineIncrEquiv) ↦ A.coefs.2 :=
+  continuous_apply 0
 
 lemma AffineIncrEquiv.tendsto_nhds_iff_tendsto_coefs {ι : Type*} {L : Filter ι}
     {As : ι → AffineIncrEquiv} (A : AffineIncrEquiv):
