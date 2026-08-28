@@ -239,7 +239,40 @@ lemma exists_forall_abs_le_of_additive_of_le_on_measure_pos
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) :
     ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, |f x| ≤ c := by
-  sorry
+  let f' : ℝ →+ ℝ := {
+    toFun := f,
+    map_zero' := by
+      suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
+      simp [← f_add 0 0],
+    map_add' := f_add
+  }
+  let f := f'.toRatLinearMap
+  have f_bdd_on_A : ∀ a ∈ A, f a ≤ M := by aesop
+  change ∃ δ > 0, ∃ c, ∀ x ∈ Ioo (-δ) δ, |f x| ≤ c
+  obtain ⟨x₁, x₂, x₁_lt_x₂, h_Ioo⟩ := exists_Ioo_subset_add_of_measure_pos A_mble A_pos
+  let y := (x₁ + x₂) / 2
+  let δ := (x₂ - x₁) / 2
+  refine ⟨δ, by positivity, 2 * M - f y, ?_⟩
+  have pos : ∀ t ∈ Ioo (-δ) δ, f t ≤ 2 * M - f y := by
+    intro t abs_t_lt_δ
+    obtain ⟨a, ha, b, hb, h_add_y_t⟩ := (by grind : y + t ∈ A + A)
+    calc
+          f t
+      _ = f (a + b - y)   := by rw [(by linarith : t = a + b - y)]
+      _ = f a + f b - f y := by rw [f.map_sub, f.map_add]
+      _ ≤ 2*M - f y       := by grw [f_bdd_on_A a ha, f_bdd_on_A b hb, two_mul]
+  have neg : ∀ t ∈ Ioo (-δ) δ, - (2 * M - f y) ≤ f t := by
+    intro t abs_t_lt_δ
+    have : f (-t) ≤ 2 * M - f y :=
+      pos (-t) (by simpa only [neg_mem_Ioo_iff, neg_neg] using abs_t_lt_δ)
+    calc
+          - (2 * M - f y)
+      _ ≤ - f (-t)        := by linarith
+      _ = f t             := by simp [f.map_neg]
+  intro t abs_t_lt_δ
+  apply abs_le.mpr; constructor
+  · simpa using neg t abs_t_lt_δ
+  · exact pos t abs_t_lt_δ
 
 open Topology in
 lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
@@ -251,6 +284,8 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   exact ⟨Ioo (-δ) δ, Ioo_mem_nhds (by linarith) δ_pos, hδ⟩
 
+
+open Filter Topology in
 lemma linear_of_additive_of_le_on_measure_pos
     {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
