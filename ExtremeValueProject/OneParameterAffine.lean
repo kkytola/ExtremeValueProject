@@ -251,12 +251,83 @@ lemma exists_nhd_abs_le_of_additive_of_le_on_measure_pos
     exists_forall_abs_le_of_additive_of_le_on_measure_pos f_add A_mble A_pos f_bdd_on_A
   exact ⟨Ioo (-δ) δ, Ioo_mem_nhds (by linarith) δ_pos, hδ⟩
 
+open Filter Topology in
+lemma linear_of_ratLinear_of_le_on_measure_pos
+    {f : ℝ →ₗ[ℚ] ℝ} {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
+    {M : ℝ} (f_bdd_on_A : ∀ x ∈ A, f x ≤ M) (x : ℝ) : f x = (f 1) * x := by
+  suffices h : |f x - x * f 1| = 0 by simpa [sub_eq_zero, mul_comm x (f 1)] using h
+  obtain ⟨B, B_in_nhds_0, c, f_bdd_on_B⟩ :=
+    exists_nhd_abs_le_of_additive_of_le_on_measure_pos f.map_add' A_mble A_pos f_bdd_on_A
+  obtain ⟨a, b, ⟨zero_in_Ioo, Ioo_subset_B⟩⟩ := mem_nhds_iff_exists_Ioo_subset.mp B_in_nhds_0
+  obtain ⟨a_neg, b_pos⟩ := Set.mem_Ioo.mp zero_in_Ioo
+  let δ := min |a| |b|
+  have δ_pos : 0 < δ := lt_min (abs_pos_of_neg a_neg) (abs_pos_of_pos b_pos)
+  have f_bdd_within
+      {x : ℝ} (n : ℕ) (n_ne_zero : n ≠ 0) (x_in_Ioo : |x| < δ / n) :
+        |f x| ≤ c / n := by
+    have n_pos : (0 : ℝ ) < (n : ℝ) :=
+      Nat.cast_pos'.mpr (Nat.zero_lt_of_ne_zero n_ne_zero)
+    suffices h : |(n : ℚ) • f x| ≤ c by simp [le_div_iff₀' n_pos]; aesop
+    have x_in_Ioo : |n • x| < δ := by simpa using (lt_div_iff₀' n_pos).mp x_in_Ioo
+    have x_in_Ioo : n • x ∈ Ioo a b := by
+      have l : -δ < n • x := by exact neg_lt_of_abs_lt x_in_Ioo
+      have r : n • x < δ := by exact lt_of_abs_lt x_in_Ioo
+      have nx_δ_Ioo : n • x ∈ Ioo (-δ) δ := Set.mem_Ioo.mpr ⟨l, r⟩
+      have sub_Ioo : Ioo (-δ) δ ⊆ Ioo a b := by
+        apply Set.Ioo_subset_Ioo
+        · grw [le_neg, ← abs_of_neg a_neg, ← min_le_left |a| |b|]
+        · grw [← abs_of_pos b_pos, ← min_le_right |a| |b|]
+      exact mem_Ioo.mpr (sub_Ioo nx_δ_Ioo)
+    suffices |(n : ℚ) • f x| ≤ c by exact this
+    rw [← f.map_smul n x]
+    exact_mod_cast f_bdd_on_B (n • x) (Ioo_subset_B x_in_Ioo)
+  have hh (n : ℕ) (n_pos : 0 < n) : ∃ q : ℚ, |x - q| < δ / n := by
+    rify at n_pos
+    exact exists_rat_near x (div_pos δ_pos n_pos)
+  have ub  : ∀ᶠ (n : ℕ) in atTop, |f x - x * f 1| ≤ (c + δ * |f 1|) / n := by
+    filter_upwards [Ioi_mem_atTop 0] with n hn
+    have n_pos : 0 < n := Set.mem_Ioi.mp hn
+    have n_ne_zero : n ≠ 0 := by exact Nat.ne_zero_of_lt hn
+    rcases hh n n_pos with ⟨q, hq⟩
+    have hq_symm : |q - x| < δ / n := by
+        rw [abs_sub_comm]
+        exact hq
+    calc |f x - x • f 1|
+      _ = |f (x - q) + q • f 1 - x • f 1|       := by simp [f.map_sub, ← f.map_smul]
+      _ = |f (x - q) + (q : ℝ) • f 1 - x • f 1| := by aesop
+      _ = |f (x - q) + (q - x) • f 1|           := by group
+      _ ≤ |f (x - q)| + |(q - x)| • |f 1|       := by grw [abs_add_le, abs_smul]
+      _ ≤ c / n + |(q - x)| • |f 1|             := by grw [f_bdd_within n n_ne_zero hq]
+      _ ≤ c / n + (δ / n) • |f 1|               := by
+        by_cases h_zero : 0 = |f 1|
+        · simp [← h_zero]
+        · have h_zero : 0 < |f 1| := lt_of_le_of_ne (abs_nonneg (f 1)) h_zero
+          suffices h : |q - x| • |f 1| < (δ / ↑n) • |f 1| by linarith
+          exact (mul_lt_mul_iff_left₀ h_zero).mpr hq_symm
+      _ = (c + δ • |f 1|) / n                   := by group
+  have tendsto_zero : Filter.Tendsto (fun n : ℕ ↦ |f x - x * f 1|) atTop (𝓝 0) :=
+    have lb : ∀ᶠ n : ℕ in atTop, 0 ≤ |f x - x * f 1| := by
+      filter_upwards [Ioi_mem_atTop 0] with _ _
+      exact abs_nonneg (f x - x * f 1)
+    have ub_tendsto_zero :
+        Filter.Tendsto (fun n : ℕ ↦ (c + δ * |f 1|) * (n : ℝ)⁻¹) atTop (𝓝 0) :=
+      tendsto_const_div_atTop_nhds_zero_nat (c + δ * |f 1|)
+    squeeze_zero' lb ub ub_tendsto_zero
+  exact tendsto_const_nhds_iff.mp tendsto_zero
+
 lemma linear_of_additive_of_le_on_measure_pos
     {f : ℝ → ℝ} (f_add : ∀ t₁ t₂, f (t₁ + t₂) = f t₁ + f t₂)
     {A : Set ℝ} (A_mble : MeasurableSet A) (A_pos : 0 < volume A)
     {M : ℝ} (f_bdd_on_A : ∀ a ∈ A, f a ≤ M) (x : ℝ) :
-    f x = (f 1) * x := by
-  sorry
+    f x = (f 1) * x :=
+  let f' : ℝ →+ ℝ := {
+    toFun := f,
+    map_zero' := by
+      suffices h : f 0 + f 0 = f 0 by simpa using congrArg (· - f 0) h
+      simp [← f_add 0 0],
+    map_add' := f_add
+  }
+  linear_of_ratLinear_of_le_on_measure_pos (f := f'.toRatLinearMap) A_mble A_pos f_bdd_on_A x
 
 open ENNReal in
 lemma linear_of_additive_of_measurable
