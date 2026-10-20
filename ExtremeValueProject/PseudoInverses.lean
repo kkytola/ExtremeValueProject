@@ -225,7 +225,7 @@ theorem rcInv_rcInv_eq_rcMod [DenselyOrdered S] :
 lemma leftOrdContinuous_lcInv [DenselyOrdered R] (F_mono : Monotone F) :
     LeftOrdContinuous (lcInv F) := by
   -- TODO: Improve this proof?
-  intro s lub_s h_lub_s
+  intro s lub_s _ h_lub_s
   refine ⟨?_, ?_⟩
   · simp only [mem_upperBounds, mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro x x_in_s
@@ -300,7 +300,14 @@ lemma symm_comp_rcInv (F : R → S) (φ : T ≃ S) (hφ : Monotone φ) :
 lemma lcInv_comp_symm (φ : R ≃ T) (hφ : RightOrdContinuous φ) :
     lcInv (F ∘ φ.symm) = φ ∘ (lcInv F) := by
   ext y
-  simp only [lcInv, Function.comp_apply, RightOrdContinuous.map_sInf' hφ _]
+  simp only [lcInv, Function.comp_apply]
+  rcases eq_empty_or_nonempty {x | y ≤ F x} with h | h
+  · have h' : {x | y ≤ F (φ.symm x)} = ∅ := by
+      simp only [eq_empty_iff_forall_notMem, mem_ofPred_eq] at h ⊢
+      exact fun x ↦ h _
+    rw [h, h', sInf_empty, sInf_empty]
+    exact (top_le_iff.mp <| (φ.apply_symm_apply ⊤).symm.le.trans (hφ.mono le_top)).symm
+  rw [RightOrdContinuous.map_sInf' hφ h]
   congr
   ext x
   simp only [mem_setOf_eq]
@@ -322,18 +329,25 @@ section DenselyOrdered
 
 variable [DenselyOrdered R]
 
-lemma LeftOrdContinuous.self_lcInv_le {F : R → S} (F_lcont : LeftOrdContinuous F) (y : S) :
+lemma LeftOrdContinuous.self_lcInv_le {F : R → S} (F_lcont : LeftOrdContinuous F)
+    (F_bot : F ⊥ = ⊥) (y : S) :
     F (lcInv F y) ≤ y := by
-  apply (F_lcont (isLUB_Iio (a := (lcInv F y)))).2
+  rcases eq_bot_or_bot_lt (lcInv F y) with h | h
+  · simp [h, F_bot]
+  apply (F_lcont (s := Iio (lcInv F y)) ⟨⊥, h⟩ isLUB_Iio).2
   simpa [mem_upperBounds] using fun x hx ↦ (apply_lt_of_lt_lcInv hx).le
 
-lemma RightOrdContinuous.self_rcInv_ge {F : R → S} {y : S} (F_rcont : RightOrdContinuous F) :
+lemma RightOrdContinuous.self_rcInv_ge {F : R → S} {y : S} (F_rcont : RightOrdContinuous F)
+    (F_top : F ⊤ = ⊤) :
     y ≤ F (rcInv F y) :=
-  LeftOrdContinuous.self_lcInv_le (R := Rᵒᵈ) (S := Sᵒᵈ) F_rcont y
+  LeftOrdContinuous.self_lcInv_le (R := Rᵒᵈ) (S := Sᵒᵈ) F_rcont F_top y
 
-lemma RightOrdContinuous.self_lcInv_ge {F : R → S} (F_rcont : RightOrdContinuous F) (y : S) :
+lemma RightOrdContinuous.self_lcInv_ge {F : R → S} (F_rcont : RightOrdContinuous F)
+    (F_top : F ⊤ = ⊤) (y : S) :
     y ≤ F (lcInv F y) := by
-  apply (F_rcont (isGLB_Ioi (a := (lcInv F y)))).2
+  rcases eq_top_or_lt_top (lcInv F y) with h | h
+  · simp [h, F_top]
+  apply (F_rcont (s := Ioi (lcInv F y)) ⟨⊤, h⟩ isGLB_Ioi).2
   simp only [mem_lowerBounds, mem_image, mem_Ioi, forall_exists_index, and_imp,
              forall_apply_eq_imp_iff₂]
   intro x hx
@@ -341,9 +355,10 @@ lemma RightOrdContinuous.self_lcInv_ge {F : R → S} (F_rcont : RightOrdContinuo
   obtain ⟨z, hz, z_lt_x⟩ := hx
   exact hz.trans (F_rcont.mono z_lt_x.le)
 
-lemma LeftOrdContinuous.self_rcInv_le {F : R → S} (F_lcont : LeftOrdContinuous F) (y : S) :
+lemma LeftOrdContinuous.self_rcInv_le {F : R → S} (F_lcont : LeftOrdContinuous F)
+    (F_bot : F ⊥ = ⊥) (y : S) :
     F (rcInv F y) ≤ y :=
-  RightOrdContinuous.self_lcInv_ge (R := Rᵒᵈ) (S := Sᵒᵈ) F_lcont y
+  RightOrdContinuous.self_lcInv_ge (R := Rᵒᵈ) (S := Sᵒᵈ) F_lcont F_bot y
 
 end DenselyOrdered
 

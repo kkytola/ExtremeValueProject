@@ -44,12 +44,18 @@ lemma forall_isGLB_imp_isGLB_image_iff_isGLB_image_Ioi {f : R → S} (f_mono : M
   forall_isLUB_imp_isLUB_image_iff_isLUB_image_Iio (R := Rᵒᵈ) (S := Sᵒᵈ) <|
     by exact fun _ _ hx ↦ f_mono hx
 
-lemma leftOrdContinuous_iff_forall_isLUB_image_Iio {f : R → S} (f_mono : Monotone f) :
+lemma leftOrdContinuous_iff_forall_isLUB_image_Iio [NoMinOrder R] {f : R → S}
+    (f_mono : Monotone f) :
     LeftOrdContinuous f ↔ ∀ (x : R), IsLUB (f '' Iio x) (f x) := by
   simp_rw [← forall_isLUB_imp_isLUB_image_iff_isLUB_image_Iio f_mono, LeftOrdContinuous]
-  aesop
+  constructor
+  · intro h x s hs
+    exact h hs.nonempty hs
+  · intro h s x _ hs
+    exact h x s hs
 
-lemma rightOrdContinuous_iff_forall_isGLB_image_Ioi {f : R → S} (f_mono : Monotone f) :
+lemma rightOrdContinuous_iff_forall_isGLB_image_Ioi [NoMaxOrder R] {f : R → S}
+    (f_mono : Monotone f) :
     RightOrdContinuous f ↔ ∀ (x : R), IsGLB (f '' Ioi x) (f x) :=
   leftOrdContinuous_iff_forall_isLUB_image_Iio (R := Rᵒᵈ) (S := Sᵒᵈ) <|
     by exact fun _ _ hx ↦ f_mono hx
@@ -213,7 +219,7 @@ lemma rcMod_apply_le_of_lt [Preorder R] [CompleteSemilatticeInf S] (F : R → S)
 /-- The left-continuous modification of a function is left-continuous. -/
 lemma leftOrdContinuous_lcMod [LinearOrder R] [CompleteSemilatticeSup S] (F : R → S) :
     LeftOrdContinuous (lcMod F) := by
-  intro s lub_s h_lub_s
+  intro s lub_s _ h_lub_s
   refine ⟨?_, ?_⟩
   · simp only [mem_upperBounds, mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro x x_in_s
