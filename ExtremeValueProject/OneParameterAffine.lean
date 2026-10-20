@@ -24,7 +24,7 @@ lemma eq_sUnion_connectedComponentIn (U : Set ℝ) :
   apply subset_antisymm
   · intro x x_in_U
     simpa using ⟨x, x_in_U, mem_connectedComponentIn x_in_U⟩
-  · simp only [sUnion_subset_iff, mem_setOf_eq, forall_exists_index, and_imp]
+  · simp only [sUnion_subset_iff, mem_ofPred_eq, forall_exists_index, and_imp]
     intro C x x_in_U hC
     simpa [hC] using connectedComponentIn_subset U x
 
@@ -150,12 +150,12 @@ lemma IsOpen.countable_setOf_connectedComponentIn
   have key := SeparableSpace.countable_connectedComponents (α := s) inferInstance
   let ψ : {C : Set α | ∃ x ∈ s, C = connectedComponentIn s x} → ConnectedComponents s :=
     fun C ↦ ConnectedComponents.mk
-            ⟨(mem_setOf_eq.mp C.prop).choose, (mem_setOf_eq.mp C.prop).choose_spec.1⟩
+            ⟨(mem_ofPred_eq.mp C.prop).choose, (mem_ofPred_eq.mp C.prop).choose_spec.1⟩
   have ψ_inj : Function.Injective ψ := by
     intro C₁ C₂ hψC
     ext1
-    have aux₁ := (mem_setOf_eq.mp C₁.prop).choose_spec
-    have aux₂ := (mem_setOf_eq.mp C₂.prop).choose_spec
+    have aux₁ := (mem_ofPred_eq.mp C₁.prop).choose_spec
+    have aux₂ := (mem_ofPred_eq.mp C₂.prop).choose_spec
     rw [aux₁.2, aux₂.2]
     simp only [ψ, ConnectedComponents.coe_eq_coe] at hψC
     rw [connectedComponentIn_eq_image aux₁.1, connectedComponentIn_eq_image aux₂.1]

@@ -56,7 +56,7 @@ private lemma MeasureTheory.FiniteMeasure.right_continuous_cdf'
   apply ContinuousWithinAt.comp (β := ℝ≥0∞)
     (f := fun z ↦ μ (Iic z)) (g := ENNReal.toNNReal) (t := {u | u ≠ ∞})
   · apply ENNReal.continuousOn_toNNReal
-    simpa only [ennreal_mass, Set.mem_setOf_eq] using coe_ne_top
+    simpa only [ennreal_mass, Set.mem_ofPred_eq] using coe_ne_top
   · simpa only [FiniteMeasure.ennreal_coeFn_eq_coeFn_toMeasure] using key
   · simp only [FiniteMeasure.ennreal_coeFn_eq_coeFn_toMeasure]
     intro z _

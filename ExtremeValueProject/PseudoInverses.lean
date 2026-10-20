@@ -115,7 +115,7 @@ lemma rcInv_mono (F : R → S) :
 
 lemma lcInv_apply_self_le (x : R) :
     (lcInv F) (F x) ≤ x :=
-  sInf_le <| by simpa only [Set.mem_setOf_eq] using le_rfl
+  sInf_le <| by simpa only [Set.mem_ofPred_eq] using le_rfl
 
 lemma le_rcInv_apply_self (x : R) :
     x ≤ (rcInv F) (F x) :=
@@ -125,7 +125,7 @@ lemma le_sInf_setOf_lcInv_ge {F : R → S} (x x' : R) (hx : x' < x) :
     F x' ≤ sInf {y | x ≤ lcInv F y} := by
   have aux : (lcInv F) (F x') < x := (sInf_le (by simp)).trans_lt hx
   apply le_sInf fun y hy ↦ ?_
-  simp only [mem_setOf_eq] at hy
+  simp only [mem_ofPred_eq] at hy
   by_contra con
   simp only [ge_iff_le, not_le] at con
   simpa using (hy.trans (lcInv_mono F con.le)).trans_lt aux
@@ -310,7 +310,7 @@ lemma lcInv_comp_symm (φ : R ≃ T) (hφ : RightOrdContinuous φ) :
   rw [RightOrdContinuous.map_sInf' hφ h]
   congr
   ext x
-  simp only [mem_setOf_eq]
+  simp only [mem_ofPred_eq]
   grind
 
 lemma lcInv_comp (φ : T ≃ R) (hφ : RightOrdContinuous φ.symm) :

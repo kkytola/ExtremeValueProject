@@ -89,7 +89,7 @@ lemma CumulativeDistributionFunction.integral_sum_indicator_eq (F : CumulativeDi
   -- The previous lemma `CumulativeDistributionFunction.integral_indicator_eq` should be
   -- the key anyway.
   have h_int_sum_change : ∫ (x : ℝ), (∑ j ∈ s, (Ioc (as j) (bs j)).indicator (fun x => α j)) x ∂F.measure  = ∑ j ∈ s, ∫ (x : ℝ), (Ioc (as j) (bs j)).indicator (fun x => α j) x ∂F.measure  := by
-    rw [← MeasureTheory.integral_finset_sum]
+    rw [← MeasureTheory.integral_finsetSum]
     simp_all only [Finset.sum_apply]
     intro j _
     exact (MeasureTheory.integrable_const (α j)).indicator measurableSet_Ioc
