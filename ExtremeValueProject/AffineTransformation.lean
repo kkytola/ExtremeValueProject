@@ -270,8 +270,8 @@ lemma AffineIncrEquiv.coefs_mkOfCoefs {a : ℝ} (a_pos : 0 < a) (b : ℝ) :
   simp [AffineIncrEquiv.coefs_mkOfCoefs]
 
 lemma AffineIncrEquiv.mem_orientationPreservingAffineEquiv (A : AffineIncrEquiv) :
-    A.val ∈ orientationPreservingAffineEquiv := by
-  simp
+    A.val ∈ orientationPreservingAffineEquiv :=
+  A.prop
 
 lemma AffineIncrEquiv.coefs_fst_pos (A : AffineIncrEquiv) :
     0 < A.coefs.1 :=

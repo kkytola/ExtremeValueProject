@@ -61,7 +61,7 @@ lemma isDegenerate_iff (F : CumulativeDistributionFunction) :
       exact Set.image_congr one_after_x₀
     have one_at_x₀ : F x₀ = 1 := by
       rw [← F.rightLim_eq, ← csInf_singleton 1, ← one_after_x₀']
-      exact Monotone.rightLim_eq_sInf F.mono NeBot.ne'
+      exact Monotone.rightLim_eq_sInf F.mono
     use x₀
     funext x
     simp only [indicator, mem_Ici]

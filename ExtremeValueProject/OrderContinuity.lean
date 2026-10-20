@@ -82,7 +82,7 @@ lemma Monotone.isLUB_image_Iio_of_continuousWithinAt_Iic {R S : Type*}
   apply f_mono.isLUB_image_Iio_of_continuousWithinAt_Iic' _ f_cont
   apply mem_closure_iff_nhdsWithin_neBot.mp
   rw [closure_Iio' (Iio_nonempty.mpr hx)]
-  exact right_mem_Iic
+  exact self_mem_Iic
 
 lemma Monotone.continuousWithinAt_Iic_of_isLUB_image_Iio {R S : Type*}
     [LinearOrder R] [TopologicalSpace R] [OrderTopology R]
@@ -258,7 +258,7 @@ lemma lcMod_apply_eq_self_apply
     (F_mono : Monotone F) {x : R} (hFx : ContinuousAt F x) (x_ne_bot : ¬ IsMin x) :
     lcMod F x = F x := by
   apply lcMod_apply_eq_self_apply' F_mono hFx
-  exact nhdsWithin_Iio_self_neBot' (Iio_nonempty.mpr x_ne_bot)
+  exact nhdsLT_neBot_of_exists_lt (Iio_nonempty.mpr x_ne_bot)
 
 lemma rcMod_apply_eq_self_apply' [CompleteLattice R] [TopologicalSpace R]
     [CompleteLattice S] [TopologicalSpace S] [ClosedIciTopology S]

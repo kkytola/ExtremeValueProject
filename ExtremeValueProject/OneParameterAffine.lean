@@ -370,6 +370,22 @@ noncomputable def AffineIncrEquiv.homOfIndex (α c : ℝ) :
   simp only [homOfIndex, MonoidHom.coe_mk, OneHom.coe_mk, coefs_snd_mkOfCoefs]
   congr
 
+@[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_fst' {β : ℝ} {s : Multiplicative ℝ} :
+    (homOfIndex₀ β s).coefs.1 = 1 :=
+  homOfIndex₀_coefs_fst (s := s.toAdd)
+
+@[simp] lemma AffineIncrEquiv.homOfIndex₀_coefs_snd' {β : ℝ} {s : Multiplicative ℝ} :
+    (homOfIndex₀ β s).coefs.2 = β * s.toAdd :=
+  homOfIndex₀_coefs_snd (s := s.toAdd)
+
+@[simp] lemma AffineIncrEquiv.homOfIndex_coefs_fst' {α c : ℝ} {s : Multiplicative ℝ} :
+    (homOfIndex α c s).coefs.1 = Real.exp (α * s.toAdd) :=
+  homOfIndex_coefs_fst (s := s.toAdd)
+
+@[simp] lemma AffineIncrEquiv.homOfIndex_coefs_snd' {α c : ℝ} {s : Multiplicative ℝ} :
+    (homOfIndex α c s).coefs.2 = c * (1 - Real.exp (α * s.toAdd)) :=
+  homOfIndex_coefs_snd (s := s.toAdd)
+
 @[simp] lemma AffineIncrEquiv.homOfIndex₀_zero' (β : ℝ) :
     homOfIndex₀ β (.ofAdd 0) = 1 :=
   map_one ..
@@ -489,7 +505,7 @@ noncomputable def AffineIncrEquiv.subGroupOfIndex (α c : ℝ) :
     {α c : ℝ} (hA : A ∈ subGroupOfIndex α c):
     A c = c := by
   obtain ⟨s, _, hs⟩ := hA
-  simp only [← hs, apply_eq, homOfIndex_coefs_fst, homOfIndex_coefs_snd]
+  simp only [← hs, apply_eq, homOfIndex_coefs_fst', homOfIndex_coefs_snd']
   ring
 
 @[simp] lemma AffineIncrEquiv.mem_subGroupOfIndex_iff_fixed_point (A : AffineIncrEquiv)
@@ -501,13 +517,13 @@ noncomputable def AffineIncrEquiv.subGroupOfIndex (α c : ℝ) :
 lemma AffineIncrEquiv.homomorphism_coef_eqn_fst
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (s₁ s₂ : ℝ) :
     (f (s₁ + s₂)).coefs.1 = (f s₁).coefs.1 * (f s₂).coefs.1 := by
-  simp [show f (s₁ + s₂) = f s₁ * f s₂ by rw [← f.map_mul] ; rfl]
+  simp [show f (s₁ + s₂) = f s₁ * f s₂ from f.map_mul s₁ s₂]
 
 /-- Functional equation for translation coefficients of a homomorphism `f : ℝ → AffineIncrEquiv`. -/
 lemma AffineIncrEquiv.homomorphism_coef_eqn_snd
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (s₁ s₂ : ℝ) :
     (f (s₁ + s₂)).coefs.2 = (f s₁).coefs.1 * (f s₂).coefs.2 + (f s₁).coefs.2 := by
-  simp [show f (s₁ + s₂) = f s₁ * f s₂ by rw [← f.map_mul] ; rfl]
+  simp [show f (s₁ + s₂) = f s₁ * f s₂ from f.map_mul s₁ s₂]
 
 open Real
 
