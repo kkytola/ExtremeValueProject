@@ -66,30 +66,24 @@ jobs:
             echo "HOME_PAGE_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Build blueprint and copy to `home_page/blueprint`
-        uses: xu-cheng/texlive-action@v2
-        with:
-          docker_image: ghcr.io/xu-cheng/texlive-full:20250401
-          run: |
-            # Install necessary dependencies and build the blueprint
-            apk update
-            apk add --update make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
-            git config --global --add safe.directory $GITHUB_WORKSPACE
-            git config --global --add safe.directory `pwd`
-            python3 -m venv env
-            source env/bin/activate
-            pip install --upgrade pip requests wheel
-            pip install pygraphviz --config-settings="--global-option=build_ext" --config-settings="--global-option=-L/usr/lib/graphviz/" --config-settings="--global-option=-R/usr/lib/graphviz/"
-            pip install leanblueprint
-            leanblueprint pdf
-            mkdir -p home_page
-            cp blueprint/print/print.pdf home_page/blueprint.pdf
-            leanblueprint web
-            cp -r blueprint/web home_page/blueprint
-
-      - name: Check declarations mentioned in the blueprint exist in Lean code
+      - name: Install TeX Live (for the pdf version of the blueprint)
         run: |
-            ~/.elan/bin/lake exe checkdecls blueprint/lean_decls
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-pygments texlive-luatex \
+            texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic
+
+      - name: Get Mathlib cache for the blueprint
+        working-directory: blueprint
+        run: ~/.elan/bin/lake exe cache get || true
+
+      # Building the blueprint also checks that the Lean declarations it mentions exist.
+      - name: Build blueprint and copy to `home_page/blueprint`
+        working-directory: blueprint
+        run: |
+          ~/.elan/bin/lake exe vbp build --pdf
+          mkdir -p ../home_page
+          cp _out/site/pdf/main.pdf ../home_page/blueprint.pdf
+          cp -r _out/site/html-multi ../home_page/blueprint
 
       - name: Copy API documentation to `home_page/docs`
         run: cp -r .lake/build/doc home_page/docs
