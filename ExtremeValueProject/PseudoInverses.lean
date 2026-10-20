@@ -302,12 +302,10 @@ lemma lcInv_comp_symm (φ : R ≃ T) (hφ : RightOrdContinuous φ) :
   ext y
   simp only [lcInv, Function.comp_apply]
   rcases eq_empty_or_nonempty {x | y ≤ F x} with h | h
-  · have h' : {x | y ≤ F (φ.symm x)} = ∅ := by
-      simp only [eq_empty_iff_forall_notMem, mem_ofPred_eq] at h ⊢
-      exact fun x ↦ h _
+  · have h' : {x | y ≤ F (φ.symm x)} = ∅ := by simp_all [eq_empty_iff_forall_notMem]
     rw [h, h', sInf_empty, sInf_empty]
     exact (top_le_iff.mp <| (φ.apply_symm_apply ⊤).symm.le.trans (hφ.mono le_top)).symm
-  rw [RightOrdContinuous.map_sInf' hφ h]
+  rw [hφ.map_sInf' h]
   congr
   ext x
   simp only [mem_ofPred_eq]
