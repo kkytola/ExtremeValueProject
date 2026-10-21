@@ -72,9 +72,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends python3-pygments texlive-luatex \
             texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-plain-generic
 
-      - name: Get Mathlib cache for the blueprint
-        working-directory: blueprint
-        run: ~/.elan/bin/lake exe cache get || true
+      # The blueprint pins the same versions as the main project, so it can reuse its dependencies
+      # (in particular Mathlib and its cache) instead of downloading a second copy.
+      - name: Share the main project's dependencies with the blueprint
+        run: mkdir -p blueprint/.lake && ln -s ../../.lake/packages blueprint/.lake/packages
 
       # Building the blueprint also checks that the Lean declarations it mentions exist.
       - name: Build blueprint and copy to `home_page/blueprint`
@@ -112,10 +113,21 @@ jobs:
         with:
           path: ${{ env.HOME_PAGE_EXISTS == 'true' && 'home_page/_site' || 'home_page/' }}
 
+      - name: Make sure the API documentation cache works
+        run: mv home_page/docs .lake/build/doc
+
+  # Runs of this workflow on other branches (e.g. started manually to test a PR) only build the
+  # website and upload it as an artifact; it is published only from `main`.
+  deploy:
+    needs: build_project
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Make sure the API documentation cache works
-        run: mv home_page/docs .lake/build/doc
      
