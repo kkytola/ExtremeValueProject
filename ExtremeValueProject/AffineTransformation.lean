@@ -270,8 +270,8 @@ lemma AffineIncrEquiv.coefs_mkOfCoefs {a : ℝ} (a_pos : 0 < a) (b : ℝ) :
   simp [AffineIncrEquiv.coefs_mkOfCoefs]
 
 lemma AffineIncrEquiv.mem_orientationPreservingAffineEquiv (A : AffineIncrEquiv) :
-    A.val ∈ orientationPreservingAffineEquiv := by
-  simp
+    A.val ∈ orientationPreservingAffineEquiv :=
+  A.prop
 
 lemma AffineIncrEquiv.coefs_fst_pos (A : AffineIncrEquiv) :
     0 < A.coefs.1 :=
@@ -522,8 +522,8 @@ noncomputable def affineTransform
   right_continuous' := by
     have orientationPreservingAffineEquiv_image_Ici (B : AffineIncrEquiv) (x : ℝ) :
         Set.Ici (B x) = B '' (Set.Ici x) := by
-      have B_Binv (z) : B (B⁻¹ z) = z := (AffineEquiv.apply_eq_iff_eq_symm_apply _).mpr rfl
-      have Binv_B (z) : B⁻¹ (B z) = z := (AffineEquiv.apply_eq_iff_eq_symm_apply _).mpr rfl
+      have B_Binv (z) : B (B⁻¹ z) = z := (AffineEquiv.eq_symm_apply _).mp rfl
+      have Binv_B (z) : B⁻¹ (B z) = z := (AffineEquiv.eq_symm_apply _).mp rfl
       ext z
       refine ⟨fun hBz ↦ ?_, fun hBiz ↦ ?_⟩
       · refine ⟨B⁻¹ z, by simpa only [Binv_B, Set.mem_Ici] using (B⁻¹).mono hBz, B_Binv z⟩

@@ -44,12 +44,14 @@ lemma forall_isGLB_imp_isGLB_image_iff_isGLB_image_Ioi {f : R → S} (f_mono : M
   forall_isLUB_imp_isLUB_image_iff_isLUB_image_Iio (R := Rᵒᵈ) (S := Sᵒᵈ) <|
     by exact fun _ _ hx ↦ f_mono hx
 
-lemma leftOrdContinuous_iff_forall_isLUB_image_Iio {f : R → S} (f_mono : Monotone f) :
+lemma leftOrdContinuous_iff_forall_isLUB_image_Iio [NoMinOrder R] {f : R → S}
+    (f_mono : Monotone f) :
     LeftOrdContinuous f ↔ ∀ (x : R), IsLUB (f '' Iio x) (f x) := by
   simp_rw [← forall_isLUB_imp_isLUB_image_iff_isLUB_image_Iio f_mono, LeftOrdContinuous]
-  aesop
+  exact ⟨fun h _ _ hs ↦ h hs.nonempty hs, by aesop⟩
 
-lemma rightOrdContinuous_iff_forall_isGLB_image_Ioi {f : R → S} (f_mono : Monotone f) :
+lemma rightOrdContinuous_iff_forall_isGLB_image_Ioi [NoMaxOrder R] {f : R → S}
+    (f_mono : Monotone f) :
     RightOrdContinuous f ↔ ∀ (x : R), IsGLB (f '' Ioi x) (f x) :=
   leftOrdContinuous_iff_forall_isLUB_image_Iio (R := Rᵒᵈ) (S := Sᵒᵈ) <|
     by exact fun _ _ hx ↦ f_mono hx
@@ -82,7 +84,7 @@ lemma Monotone.isLUB_image_Iio_of_continuousWithinAt_Iic {R S : Type*}
   apply f_mono.isLUB_image_Iio_of_continuousWithinAt_Iic' _ f_cont
   apply mem_closure_iff_nhdsWithin_neBot.mp
   rw [closure_Iio' (Iio_nonempty.mpr hx)]
-  exact right_mem_Iic
+  exact self_mem_Iic
 
 lemma Monotone.continuousWithinAt_Iic_of_isLUB_image_Iio {R S : Type*}
     [LinearOrder R] [TopologicalSpace R] [OrderTopology R]
@@ -213,7 +215,7 @@ lemma rcMod_apply_le_of_lt [Preorder R] [CompleteSemilatticeInf S] (F : R → S)
 /-- The left-continuous modification of a function is left-continuous. -/
 lemma leftOrdContinuous_lcMod [LinearOrder R] [CompleteSemilatticeSup S] (F : R → S) :
     LeftOrdContinuous (lcMod F) := by
-  intro s lub_s h_lub_s
+  intro s lub_s _ h_lub_s
   refine ⟨?_, ?_⟩
   · simp only [mem_upperBounds, mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro x x_in_s
@@ -258,7 +260,7 @@ lemma lcMod_apply_eq_self_apply
     (F_mono : Monotone F) {x : R} (hFx : ContinuousAt F x) (x_ne_bot : ¬ IsMin x) :
     lcMod F x = F x := by
   apply lcMod_apply_eq_self_apply' F_mono hFx
-  exact nhdsWithin_Iio_self_neBot' (Iio_nonempty.mpr x_ne_bot)
+  exact nhdsLT_neBot_of_exists_lt (Iio_nonempty.mpr x_ne_bot)
 
 lemma rcMod_apply_eq_self_apply' [CompleteLattice R] [TopologicalSpace R]
     [CompleteLattice S] [TopologicalSpace S] [ClosedIciTopology S]

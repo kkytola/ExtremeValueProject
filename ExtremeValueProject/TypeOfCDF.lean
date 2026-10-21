@@ -82,7 +82,7 @@ lemma apply_eq_one_of_tendsto_of_gt
     -- Choose `x'` s.t. `β < x' < x` and `G'` is continuous at `x'`
     obtain ⟨x', ⟨x'_gt, x'_lt⟩, x'_cont⟩ :=
       (dense_cont_pts G').inter_open_nonempty (Ioo β x) isOpen_Ioo (nonempty_Ioo.mpr x_gt)
-    simp only [mem_setOf_eq] at x'_cont
+    simp only [mem_ofPred_eq] at x'_cont
 
     -- Choose `z'` s.t. `G(z') > 1 - ε'` where `ε' := ε/2`
     set ε' := ε/2 with hε'
@@ -95,7 +95,7 @@ lemma apply_eq_one_of_tendsto_of_gt
     -- Choose `z` s.t. `G(z) > 1 - ε'` and `G` is continuous at `z`
     obtain ⟨z, z_gt, z_cont⟩ :=
       (dense_cont_pts G).inter_open_nonempty {z | z' < z} isOpen_Ioi nonempty_Ioi
-    simp only [mem_setOf_eq] at z_gt z_cont
+    simp only [mem_ofPred_eq] at z_gt z_cont
     have Gz_gt : 1 - ε' < G z := hz'.trans_le <| G.mono (by linarith)
 
     -- `Aₙ(z) → β`

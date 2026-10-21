@@ -157,7 +157,7 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
   exfalso
   have Gx_pow (s) : (homOfIndex α c s • G) x = Real.rpow (G x) (Real.exp s) := by
     simp only [rpow_eq_pow, ← CumulativeDistributionFunction.pow_apply_eq G (exp_pos s) x, hG s]
-  have but : Tendsto (fun s ↦ (homOfIndex α c s)⁻¹ x) atBot atBot := by
+  have but : Tendsto (fun (s : ℝ) ↦ (homOfIndex α c s)⁻¹ x) atBot atBot := by
     have same_but : Tendsto (fun s ↦ Real.exp (-(α * s)) * (x - c) + c) atBot atBot := by
       apply tendsto_atBot_add_const_right atBot c
       apply (tendsto_mul_const_atBot_of_neg (show x - c < 0 by linarith)).mpr
@@ -176,7 +176,7 @@ lemma apply_eq_zero_of_lt_of_selfSimilar_index_pos' {G : CumulativeDistributionF
     (tendsto_nhds_unique (Tendsto.congr (f₂ := fun _ ↦ 1) ?_ well) tendsto_const_nhds)
   intro s
   dsimp
-  rw [← CumulativeDistributionFunction.mulAction_apply_eq, Gx_pow] -- (Avoid unwanted simping.)
+  rw [← CumulativeDistributionFunction.mulAction_apply_eq, Gx_pow s] -- (Avoid unwanted simping.)
   simp [h1]
 
 open AffineIncrEquiv in

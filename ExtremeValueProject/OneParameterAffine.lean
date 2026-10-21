@@ -24,7 +24,7 @@ lemma eq_sUnion_connectedComponentIn (U : Set ℝ) :
   apply subset_antisymm
   · intro x x_in_U
     simpa using ⟨x, x_in_U, mem_connectedComponentIn x_in_U⟩
-  · simp only [sUnion_subset_iff, mem_setOf_eq, forall_exists_index, and_imp]
+  · simp only [sUnion_subset_iff, mem_ofPred_eq, forall_exists_index, and_imp]
     intro C x x_in_U hC
     simpa [hC] using connectedComponentIn_subset U x
 
@@ -150,12 +150,12 @@ lemma IsOpen.countable_setOf_connectedComponentIn
   have key := SeparableSpace.countable_connectedComponents (α := s) inferInstance
   let ψ : {C : Set α | ∃ x ∈ s, C = connectedComponentIn s x} → ConnectedComponents s :=
     fun C ↦ ConnectedComponents.mk
-            ⟨(mem_setOf_eq.mp C.prop).choose, (mem_setOf_eq.mp C.prop).choose_spec.1⟩
+            ⟨(mem_ofPred_eq.mp C.prop).choose, (mem_ofPred_eq.mp C.prop).choose_spec.1⟩
   have ψ_inj : Function.Injective ψ := by
     intro C₁ C₂ hψC
     ext1
-    have aux₁ := (mem_setOf_eq.mp C₁.prop).choose_spec
-    have aux₂ := (mem_setOf_eq.mp C₂.prop).choose_spec
+    have aux₁ := (mem_ofPred_eq.mp C₁.prop).choose_spec
+    have aux₂ := (mem_ofPred_eq.mp C₂.prop).choose_spec
     rw [aux₁.2, aux₂.2]
     simp only [ψ, ConnectedComponents.coe_eq_coe] at hψC
     rw [connectedComponentIn_eq_image aux₁.1, connectedComponentIn_eq_image aux₂.1]
@@ -489,7 +489,7 @@ noncomputable def AffineIncrEquiv.subGroupOfIndex (α c : ℝ) :
     {α c : ℝ} (hA : A ∈ subGroupOfIndex α c):
     A c = c := by
   obtain ⟨s, _, hs⟩ := hA
-  simp only [← hs, apply_eq, homOfIndex_coefs_fst, homOfIndex_coefs_snd]
+  simp only [← hs, apply_eq, homOfIndex_coefs_fst (s := s), homOfIndex_coefs_snd (s := s)]
   ring
 
 @[simp] lemma AffineIncrEquiv.mem_subGroupOfIndex_iff_fixed_point (A : AffineIncrEquiv)
@@ -501,13 +501,13 @@ noncomputable def AffineIncrEquiv.subGroupOfIndex (α c : ℝ) :
 lemma AffineIncrEquiv.homomorphism_coef_eqn_fst
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (s₁ s₂ : ℝ) :
     (f (s₁ + s₂)).coefs.1 = (f s₁).coefs.1 * (f s₂).coefs.1 := by
-  simp [show f (s₁ + s₂) = f s₁ * f s₂ by rw [← f.map_mul] ; rfl]
+  simp [show f (s₁ + s₂) = f s₁ * f s₂ from f.map_mul s₁ s₂]
 
 /-- Functional equation for translation coefficients of a homomorphism `f : ℝ → AffineIncrEquiv`. -/
 lemma AffineIncrEquiv.homomorphism_coef_eqn_snd
     (f : MonoidHom (Multiplicative ℝ) AffineIncrEquiv) (s₁ s₂ : ℝ) :
     (f (s₁ + s₂)).coefs.2 = (f s₁).coefs.1 * (f s₂).coefs.2 + (f s₁).coefs.2 := by
-  simp [show f (s₁ + s₂) = f s₁ * f s₂ by rw [← f.map_mul] ; rfl]
+  simp [show f (s₁ + s₂) = f s₁ * f s₂ from f.map_mul s₁ s₂]
 
 open Real
 
@@ -598,7 +598,10 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     obtain ⟨β, b_eq_β_mul_s⟩ : ∃ α, b = fun s => α * s :=
       eq_const_mul_of_additive_of_measurable b_hom' b_mble
     use β
-    suffices ∀ (s x : ℝ), (f s).coefs.1 * x + (f s).coefs.2 = x + β * s by aesop
+    suffices ∀ (s x : ℝ), (f s).coefs.1 * x + (f s).coefs.2 = x + β * s by
+      refine MonoidHom.ext fun s ↦ ?_
+      ext x
+      simpa [homOfIndex₀_coefs_fst (s := s), homOfIndex₀_coefs_snd (s := s)] using this s x
     exact fun s x ↦ show a s * x + b s = x + β * s by simp [a_eq_one, b_eq_β_mul_s]
   · right
     rw [a_eq_exp_α_s] at b_hom
@@ -620,12 +623,12 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization_of_nontrivial
     by_contra maybe_zero
     apply f_nontriv
     ext x
-    simp [hβ, maybe_zero]
+    simp [hβ, maybe_zero, homOfIndex₀]
   · obtain ⟨α, c, h⟩ := h₁
     refine Or.inr ⟨α, c, ?_, h⟩
     by_contra maybe_zero
     apply f_nontriv
     ext x
-    simp [h, maybe_zero]
+    simp [h, maybe_zero, homOfIndex]
 
 end one_parameter_subgroups_of_affine_transformations
