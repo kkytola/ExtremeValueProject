@@ -48,11 +48,7 @@ lemma leftOrdContinuous_iff_forall_isLUB_image_Iio [NoMinOrder R] {f : R → S}
     (f_mono : Monotone f) :
     LeftOrdContinuous f ↔ ∀ (x : R), IsLUB (f '' Iio x) (f x) := by
   simp_rw [← forall_isLUB_imp_isLUB_image_iff_isLUB_image_Iio f_mono, LeftOrdContinuous]
-  constructor
-  · intro h x s hs
-    exact h hs.nonempty hs
-  · intro h s x _ hs
-    exact h x s hs
+  exact ⟨fun h _ _ hs ↦ h hs.nonempty hs, by aesop⟩
 
 lemma rightOrdContinuous_iff_forall_isGLB_image_Ioi [NoMaxOrder R] {f : R → S}
     (f_mono : Monotone f) :
