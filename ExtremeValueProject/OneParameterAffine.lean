@@ -598,7 +598,10 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization
     obtain ⟨β, b_eq_β_mul_s⟩ : ∃ α, b = fun s => α * s :=
       eq_const_mul_of_additive_of_measurable b_hom' b_mble
     use β
-    suffices ∀ (s x : ℝ), (f s).coefs.1 * x + (f s).coefs.2 = x + β * s by aesop
+    suffices ∀ (s x : ℝ), (f s).coefs.1 * x + (f s).coefs.2 = x + β * s by
+      refine MonoidHom.ext fun s ↦ ?_
+      ext x
+      simpa [homOfIndex₀_coefs_fst (s := s), homOfIndex₀_coefs_snd (s := s)] using this s x
     exact fun s x ↦ show a s * x + b s = x + β * s by simp [a_eq_one, b_eq_β_mul_s]
   · right
     rw [a_eq_exp_α_s] at b_hom
@@ -620,12 +623,12 @@ theorem AffineIncrEquiv.homomorphism_from_Real_characterization_of_nontrivial
     by_contra maybe_zero
     apply f_nontriv
     ext x
-    simp [hβ, maybe_zero]
+    simp [hβ, maybe_zero, homOfIndex₀]
   · obtain ⟨α, c, h⟩ := h₁
     refine Or.inr ⟨α, c, ?_, h⟩
     by_contra maybe_zero
     apply f_nontriv
     ext x
-    simp [h, maybe_zero]
+    simp [h, maybe_zero, homOfIndex]
 
 end one_parameter_subgroups_of_affine_transformations
