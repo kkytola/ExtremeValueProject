@@ -3,10 +3,5 @@
 /lake-packages/*
 .lake
 .lake/*
-blueprint/lean_decls
-blueprint/src/web.paux
-blueprint/web
-blueprint/web/*
-blueprint/print
-blueprint/print/*
+blueprint/_out
 
